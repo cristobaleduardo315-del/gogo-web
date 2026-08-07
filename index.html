@@ -25,19 +25,6 @@
       overflow-x: hidden;
     }
 
-    /* Efecto "llamativo" al llegar a una sección desde un botón "Quiero mi
-       gogó": un resplandor breve que se desvanece, para que el aterrizaje
-       se sienta guiado en vez de un salto seco. */
-    .seccion-destino-flash {
-      animation: destinoFlash 1.1s ease;
-    }
-
-    @keyframes destinoFlash {
-      0% { background-color: rgba(204, 255, 0, 0); }
-      25% { background-color: rgba(204, 255, 0, 0.16); }
-      100% { background-color: rgba(204, 255, 0, 0); }
-    }
-
     /* ================= HEADER CON DESVANECIMIENTO EN SCROLL ================= */
     .site-header {
       position: fixed;
@@ -625,24 +612,34 @@
 
   <!-- ================= JAVASCRIPT ================= -->
   <script>
-    // Lleva al usuario a la sección de Planes con un desplazamiento suave
-    // (no un salto seco) y un breve resplandor de color de marca al llegar,
-    // para que el "aterrizaje" se sienta guiado y llamativo. La usan todos
-    // los botones "Quiero mi gogó" del sitio.
+    // Lleva al usuario a la sección de Planes con un desplazamiento suave y
+    // sutil (más lento que el scroll suave estándar del navegador, sin
+    // ningún efecto de resplandor). La usan todos los botones "Quiero mi
+    // gogó" del sitio.
+    function easeInOutCubic(t) {
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
     function irAPlanes(event) {
       if (event) event.preventDefault();
       const destino = document.getElementById('planes');
       if (!destino) return;
 
-      destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const startY = window.scrollY;
+      const targetY = startY + destino.getBoundingClientRect().top;
+      const distance = targetY - startY;
+      const duration = 900; // 1.5x más lento que un scroll suave estándar (~600ms)
+      const startTime = performance.now();
 
-      // El scroll suave tarda un poco en llegar; disparamos el resplandor
-      // después para que coincida con el momento de la llegada.
-      destino.classList.remove('seccion-destino-flash');
-      window.setTimeout(() => {
-        destino.classList.add('seccion-destino-flash');
-        window.setTimeout(() => destino.classList.remove('seccion-destino-flash'), 1100);
-      }, 500);
+      function paso(now) {
+        const progreso = Math.min((now - startTime) / duration, 1);
+        // behavior: 'instant' evita que el scroll-behavior:smooth global
+        // vuelva a suavizar cada paso (lo que duplicaba el efecto y
+        // alargaba la animación más de lo previsto).
+        window.scrollTo({ top: startY + distance * easeInOutCubic(progreso), left: 0, behavior: 'instant' });
+        if (progreso < 1) requestAnimationFrame(paso);
+      }
+      requestAnimationFrame(paso);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
