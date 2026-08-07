@@ -68,9 +68,21 @@
     }
 
     .logo-img {
-      height: 22px;
+      height: 33px;
       width: auto;
       object-fit: contain;
+    }
+
+    /* Ícono del logo dentro de los botones "Quiero mi gogó" */
+    .btn-logo-icon {
+      height: 1.35em;
+      width: auto;
+      display: inline-block;
+      object-fit: contain;
+      vertical-align: middle;
+      margin: 0 2px;
+      position: relative;
+      top: -0.01em;
     }
 
     /* Menú de Navegación */
@@ -405,7 +417,7 @@
       }
 
       .logo-img {
-        height: 18px;
+        height: 27px;
       }
 
       .header-btn {
@@ -519,7 +531,7 @@
 
       <!-- Acción Principal y Botón Móvil -->
       <div class="header-actions">
-        <a href="#planes" class="header-btn" onclick="irAPlanes(event)">QUIERO MI GOGÓ ↗</a>
+        <a href="#planes" class="header-btn" onclick="irAPlanes(event)">QUIERO MI <img src="assets/logo.webp" alt="gogó" class="btn-logo-icon"> ↗</a>
         
         <button class="mobile-toggle" id="mobileToggle" aria-label="Abrir Menú">
           <span></span>
@@ -556,7 +568,7 @@
 
     <!-- Main CTA Button -->
     <a href="#planes" class="btn-main-cta" onclick="irAPlanes(event)">
-      Quiero mi gogó
+      Quiero mi <img src="assets/logo.webp" alt="gogó" class="btn-logo-icon">
     </a>
 
     <!-- Interactive Fan Cards Container -->
@@ -1979,7 +1991,7 @@
         <a href="#planes" class="stack-card-green" onclick="irAPlanes(event)">
           <p>Potencia la presencia digital de tu negocio desde hoy.</p>
           <div class="stack-card-action">
-            <span class="action-text">Quiero mi Gogó</span>
+            <span class="action-text">Quiero mi <img src="assets/logo.webp" alt="gogó" class="btn-logo-icon"></span>
             <div class="circle-arrow-btn">➔</div>
           </div>
         </a>
@@ -3814,7 +3826,7 @@
     </p>
 
     <a href="#planes" class="cta-btn-main" onclick="irAPlanes(event)">
-      Quiero mi GoGo <span class="arrow">➔</span>
+      Quiero mi <img src="assets/logo.webp" alt="gogó" class="btn-logo-icon"> <span class="arrow">➔</span>
     </a>
 
   </div>
