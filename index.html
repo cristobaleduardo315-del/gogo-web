@@ -2443,7 +2443,7 @@
           </ul>
         </div>
 
-        <a href="#contacto" id="btn-start" class="plan-btn">Elegir Start</a>
+        <a href="#resumen-plan" id="btn-start" class="plan-btn" onclick="mostrarResumenPlan('start'); return false;">Elegir Start</a>
       </div>
 
       <!-- Plan 2: PLUS (DESTACADO) -->
@@ -2526,7 +2526,7 @@
           </ul>
         </div>
 
-        <a href="#contacto" id="btn-plus" class="plan-btn">Elegir Plus</a>
+        <a href="#resumen-plan" id="btn-plus" class="plan-btn" onclick="mostrarResumenPlan('plus'); return false;">Elegir Plus</a>
       </div>
 
       <!-- Plan 3: PRO -->
@@ -2599,7 +2599,7 @@
           </ul>
         </div>
 
-        <a href="#contacto" id="btn-pro" class="plan-btn">Elegir Pro</a>
+        <a href="#resumen-plan" id="btn-pro" class="plan-btn" onclick="mostrarResumenPlan('pro'); return false;">Elegir Pro</a>
       </div>
 
     </div>
@@ -2609,6 +2609,10 @@
 
 <!-- ================= SCRIPT INTERACTIVO PRECIOS ================= -->
 <script>
+  // Periodicidad de facturación actualmente seleccionada (se usa también
+  // para armar el resumen del plan al hacer clic en "Elegir ...").
+  let currentBillingPeriod = 'monthly';
+
   // Precios de referencia en USD según el período
   const pricingData = {
     monthly: {
@@ -2632,6 +2636,8 @@
   };
 
   function setBillingPeriod(period) {
+    currentBillingPeriod = period;
+
     // 1. Cambiar estado activo en los botones
     const buttons = document.querySelectorAll('.billing-btn');
     buttons.forEach((btn, idx) => {
@@ -2644,18 +2650,422 @@
 
     // 2. Actualizar precios y etiquetas en pantalla
     const data = pricingData[period];
-    
+
     document.getElementById('price-start').innerText = data.startPrice;
     document.getElementById('period-start').innerText = data.periodLabel;
-    document.getElementById('btn-start').href = `#contacto?plan=start&frecuencia=${period}`;
 
     document.getElementById('price-plus').innerText = data.plusPrice;
     document.getElementById('period-plus').innerText = data.periodLabel;
-    document.getElementById('btn-plus').href = `#contacto?plan=plus&frecuencia=${period}`;
 
     document.getElementById('price-pro').innerText = data.proPrice;
     document.getElementById('period-pro').innerText = data.periodLabel;
-    document.getElementById('btn-pro').href = `#contacto?plan=pro&frecuencia=${period}`;
+
+    // Si el resumen del plan ya está abierto, mantenlo sincronizado con la
+    // nueva periodicidad elegida.
+    const resumenSection = document.getElementById('resumen-plan');
+    if (resumenSection && resumenSection.style.display !== 'none' && window.planSeleccionadoActual) {
+      mostrarResumenPlan(window.planSeleccionadoActual, { scroll: false });
+    }
+  }
+</script>
+
+<!-- ================= ESTILOS SECCIÓN RESUMEN DEL PLAN ================= -->
+<style>
+  .section-resumen {
+    background-color: #f4f4f2;
+    color: #0b0b0b;
+    padding: 90px 24px;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  .section-resumen * {
+    box-sizing: border-box;
+  }
+
+  .resumen-container {
+    max-width: 980px;
+    margin: 0 auto;
+  }
+
+  .resumen-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    color: #555555;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 32px;
+    font-family: inherit;
+  }
+
+  .resumen-back svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .resumen-back:hover {
+    color: #0b0b0b;
+  }
+
+  .resumen-header {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 48px auto;
+  }
+
+  .resumen-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #666666;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .resumen-kicker .kicker-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #ccff00;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 10px rgba(204, 255, 0, 0.8);
+  }
+
+  .resumen-title {
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 800;
+    color: #0b0b0b;
+    line-height: 1.15;
+    letter-spacing: -1px;
+    margin: 0 0 12px 0;
+  }
+
+  .resumen-subtitle {
+    font-size: 16px;
+    color: #555555;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .resumen-card {
+    background: #ffffff;
+    border-radius: 28px;
+    padding: 40px;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 40px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    align-items: start;
+  }
+
+  .resumen-plan-kicker {
+    font-size: 12px;
+    font-weight: 800;
+    color: #888888;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  .resumen-plan-name {
+    font-size: 26px;
+    font-weight: 800;
+    color: #0b0b0b;
+    margin: 8px 0 12px 0;
+    letter-spacing: -0.5px;
+  }
+
+  .resumen-plan-description {
+    font-size: 14px;
+    color: #666666;
+    line-height: 1.5;
+    margin: 0 0 24px 0;
+  }
+
+  .resumen-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .resumen-features li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #333333;
+    font-weight: 500;
+  }
+
+  .resumen-features li svg {
+    width: 16px;
+    height: 16px;
+    color: #0b0b0b;
+    flex-shrink: 0;
+    stroke-width: 2.5;
+  }
+
+  .resumen-summary-box {
+    background: #0b0b0b;
+    color: #ffffff;
+    border-radius: 20px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .resumen-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: #a0a0a0;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .resumen-line span:last-child {
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  .resumen-line-total {
+    border-bottom: none;
+    padding-top: 16px;
+  }
+
+  .resumen-line-total span:first-child {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .resumen-line-total span:last-child {
+    color: #ccff00;
+    font-weight: 800;
+    font-size: 22px;
+  }
+
+  .resumen-pagar-btn {
+    margin-top: 20px;
+    width: 100%;
+    padding: 16px 24px;
+    border-radius: 40px;
+    background: #ccff00;
+    color: #000000;
+    border: none;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(204, 255, 0, 0.25);
+    font-family: inherit;
+  }
+
+  .resumen-pagar-btn:hover {
+    background: #d8ff33;
+    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(204, 255, 0, 0.4);
+  }
+
+  .resumen-pago-nota {
+    font-size: 12px;
+    color: #888888;
+    text-align: center;
+    margin: 14px 0 0 0;
+  }
+
+  .resumen-pago-msg {
+    font-size: 13px;
+    color: #ccff00;
+    text-align: center;
+    margin: 14px 0 0 0;
+    line-height: 1.5;
+    background: rgba(204, 255, 0, 0.08);
+    border: 1px solid rgba(204, 255, 0, 0.25);
+    border-radius: 12px;
+    padding: 12px;
+  }
+
+  @media (max-width: 768px) {
+    .resumen-card {
+      grid-template-columns: 1fr;
+      padding: 28px 20px;
+      gap: 28px;
+    }
+  }
+</style>
+
+<!-- ================= ESTRUCTURA HTML SECCIÓN RESUMEN DEL PLAN ================= -->
+<section class="section-resumen" id="resumen-plan" style="display: none;">
+  <div class="resumen-container">
+    <button type="button" class="resumen-back" onclick="volverAPlanes()">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+      </svg>
+      Volver a planes
+    </button>
+
+    <div class="resumen-header">
+      <span class="resumen-kicker">
+        <span class="kicker-dot"></span> RESUMEN DE TU PEDIDO
+      </span>
+      <h2 class="resumen-title">Ya casi está listo</h2>
+      <p class="resumen-subtitle">Revisa los detalles de tu plan antes de continuar.</p>
+    </div>
+
+    <div class="resumen-card">
+      <div>
+        <span class="resumen-plan-kicker" id="resumen-plan-kicker">PLUS</span>
+        <h3 class="resumen-plan-name" id="resumen-plan-name">GoGo Plus</h3>
+        <p class="resumen-plan-description" id="resumen-plan-description"></p>
+
+        <ul class="resumen-features" id="resumen-plan-features"></ul>
+      </div>
+
+      <div class="resumen-summary-box">
+        <div class="resumen-line">
+          <span>Plan</span>
+          <span id="resumen-line-plan">GoGo Plus</span>
+        </div>
+        <div class="resumen-line">
+          <span>Periodicidad</span>
+          <span id="resumen-line-periodo">Mensual</span>
+        </div>
+        <div class="resumen-line resumen-line-total">
+          <span>Total a pagar</span>
+          <span id="resumen-line-total">$39 / mes</span>
+        </div>
+
+        <button type="button" class="resumen-pagar-btn" id="resumen-pagar-btn" onclick="procesarPago()">
+          Pagar
+        </button>
+        <p class="resumen-pago-nota" id="resumen-pago-nota">Pago seguro. Podrás cancelar cuando quieras.</p>
+        <p class="resumen-pago-msg" id="resumen-pago-msg" style="display: none;">
+          Estamos activando los pagos en línea. Muy pronto podrás completar tu compra aquí mismo — mientras tanto, escríbenos y te ayudamos a activar tu plan.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SCRIPT RESUMEN DEL PLAN ================= -->
+<script>
+  const planDetails = {
+    start: {
+      kicker: 'START',
+      name: 'GoGo Start',
+      description: 'Para negocios que apenas están comenzando su presencia digital.',
+      features: [
+        'Una página digital propia',
+        'Hasta 30 productos o servicios',
+        'Botón directo a WhatsApp',
+        'Información completa del negocio',
+        'Código QR incluido',
+        'Diseño base y entrega rápida'
+      ]
+    },
+    plus: {
+      kicker: 'PLUS',
+      name: 'GoGo Plus',
+      description: 'La mejor relación entre precio y todo lo que necesitas para vender más.',
+      features: [
+        'Todo lo del plan Start',
+        'Hasta 80 productos',
+        'Categorías ilimitadas',
+        'Galería de fotografías',
+        'Redes sociales y ubicación integrada',
+        'Banners promocionales',
+        'Diseño personalizado'
+      ]
+    },
+    pro: {
+      kicker: 'PRO',
+      name: 'GoGo Pro',
+      description: 'Para negocios que quieren ofrecer una experiencia completa y escalar.',
+      features: [
+        'Todo lo del plan Plus',
+        'Productos ilimitados',
+        'Varias sedes o sucursales',
+        'Promociones destacadas',
+        'Prioridad en soporte',
+        'Personalización y desarrollo a medida'
+      ]
+    }
+  };
+
+  const billingPeriodLabels = {
+    monthly: 'Mensual',
+    quarterly: 'Trimestral',
+    annual: 'Anual'
+  };
+
+  // Recuerda qué plan quedó seleccionado, para poder refrescar el resumen
+  // si el usuario cambia la periodicidad (mensual/trimestral/anual) mientras
+  // el resumen ya está abierto.
+  window.planSeleccionadoActual = null;
+
+  function mostrarResumenPlan(planKey, options) {
+    const opts = options || {};
+    const scroll = opts.scroll !== false;
+    const plan = planDetails[planKey];
+    if (!plan) return;
+
+    window.planSeleccionadoActual = planKey;
+
+    const period = typeof currentBillingPeriod !== 'undefined' ? currentBillingPeriod : 'monthly';
+    const priceData = pricingData[period];
+    const price = priceData[planKey + 'Price'];
+
+    document.getElementById('resumen-plan-kicker').innerText = plan.kicker;
+    document.getElementById('resumen-plan-name').innerText = plan.name;
+    document.getElementById('resumen-plan-description').innerText = plan.description;
+
+    const featuresList = document.getElementById('resumen-plan-features');
+    featuresList.innerHTML = '';
+    plan.features.forEach(function (feature) {
+      const li = document.createElement('li');
+      li.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>';
+      li.appendChild(document.createTextNode(feature));
+      featuresList.appendChild(li);
+    });
+
+    document.getElementById('resumen-line-plan').innerText = plan.name;
+    document.getElementById('resumen-line-periodo').innerText = billingPeriodLabels[period];
+    document.getElementById('resumen-line-total').innerText = '$' + price + ' ' + priceData.periodLabel;
+
+    // Si el usuario ya había hecho clic en "Pagar" antes, vuelve a mostrar
+    // la nota normal al reabrir/cambiar de plan.
+    document.getElementById('resumen-pago-msg').style.display = 'none';
+    document.getElementById('resumen-pago-nota').style.display = 'block';
+
+    const section = document.getElementById('resumen-plan');
+    section.style.display = 'block';
+    if (scroll) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  function volverAPlanes() {
+    document.getElementById('resumen-plan').style.display = 'none';
+    document.querySelector('.section-planes').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function procesarPago() {
+    document.getElementById('resumen-pago-nota').style.display = 'none';
+    document.getElementById('resumen-pago-msg').style.display = 'block';
   }
 </script>
 
