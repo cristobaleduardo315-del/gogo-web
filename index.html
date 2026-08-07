@@ -12,11 +12,30 @@
       padding: 0;
     }
 
+    /* Desplazamiento suave para cualquier enlace ancla (#planes, etc.), en
+       vez del salto instantáneo por defecto del navegador. */
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       background-color: #0b0b0b;
       color: #ffffff;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       overflow-x: hidden;
+    }
+
+    /* Efecto "llamativo" al llegar a una sección desde un botón "Quiero mi
+       gogó": un resplandor breve que se desvanece, para que el aterrizaje
+       se sienta guiado en vez de un salto seco. */
+    .seccion-destino-flash {
+      animation: destinoFlash 1.1s ease;
+    }
+
+    @keyframes destinoFlash {
+      0% { background-color: rgba(204, 255, 0, 0); }
+      25% { background-color: rgba(204, 255, 0, 0.16); }
+      100% { background-color: rgba(204, 255, 0, 0); }
     }
 
     /* ================= HEADER CON DESVANECIMIENTO EN SCROLL ================= */
@@ -513,7 +532,7 @@
 
       <!-- Acción Principal y Botón Móvil -->
       <div class="header-actions">
-        <a href="#planes" class="header-btn">QUIERO MI GOGÓ ↗</a>
+        <a href="#planes" class="header-btn" onclick="irAPlanes(event)">QUIERO MI GOGÓ ↗</a>
         
         <button class="mobile-toggle" id="mobileToggle" aria-label="Abrir Menú">
           <span></span>
@@ -549,7 +568,7 @@
     </p>
 
     <!-- Main CTA Button -->
-    <a href="#planes" class="btn-main-cta">
+    <a href="#planes" class="btn-main-cta" onclick="irAPlanes(event)">
       Quiero mi gogó
     </a>
 
@@ -606,6 +625,26 @@
 
   <!-- ================= JAVASCRIPT ================= -->
   <script>
+    // Lleva al usuario a la sección de Planes con un desplazamiento suave
+    // (no un salto seco) y un breve resplandor de color de marca al llegar,
+    // para que el "aterrizaje" se sienta guiado y llamativo. La usan todos
+    // los botones "Quiero mi gogó" del sitio.
+    function irAPlanes(event) {
+      if (event) event.preventDefault();
+      const destino = document.getElementById('planes');
+      if (!destino) return;
+
+      destino.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      // El scroll suave tarda un poco en llegar; disparamos el resplandor
+      // después para que coincida con el momento de la llegada.
+      destino.classList.remove('seccion-destino-flash');
+      window.setTimeout(() => {
+        destino.classList.add('seccion-destino-flash');
+        window.setTimeout(() => destino.classList.remove('seccion-destino-flash'), 1100);
+      }, 500);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const header = document.getElementById('siteHeader');
       const mobileToggle = document.getElementById('mobileToggle');
@@ -1791,6 +1830,18 @@
     flex-direction: column;
     justify-content: space-between;
     box-shadow: 0 10px 25px rgba(204, 255, 0, 0.25);
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .stack-card-green:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 34px rgba(204, 255, 0, 0.4);
+  }
+
+  .stack-card-green:hover .circle-arrow-btn {
+    transform: translateX(3px);
   }
 
   .stack-card-green p {
@@ -1810,6 +1861,7 @@
   .stack-card-green .circle-arrow-btn {
     background: #000000;
     color: #ffffff;
+    transition: transform 0.25s ease;
   }
 
   /* ================= RESPONSIVE ================= */
@@ -1927,13 +1979,13 @@
         </div>
 
         <!-- Tarjeta Inferior Verde Neón -->
-        <div class="stack-card-green">
+        <a href="#planes" class="stack-card-green" onclick="irAPlanes(event)">
           <p>Potencia la presencia digital de tu negocio desde hoy.</p>
           <div class="stack-card-action">
             <span class="action-text">Quiero mi Gogó</span>
             <div class="circle-arrow-btn">➔</div>
           </div>
-        </div>
+        </a>
 
       </div>
 
@@ -3764,7 +3816,7 @@
       Empieza hoy con GoGo y ofrece una experiencia digital moderna, rápida y profesional para tus clientes.
     </p>
 
-    <a href="#planes" class="cta-btn-main">
+    <a href="#planes" class="cta-btn-main" onclick="irAPlanes(event)">
       Quiero mi GoGo <span class="arrow">➔</span>
     </a>
 
