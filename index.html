@@ -32,7 +32,6 @@
       visibility: visible;
       pointer-events: auto;
       transform: translateY(0);
-      /* Transición fluida para la opacidad y posición */
       transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
                   visibility 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
                   transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -154,8 +153,10 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding: 140px 20px 40px 20px;
-      background: radial-gradient(circle at 50% 20%, rgba(30, 30, 35, 0.8) 0%, rgba(11, 11, 11, 1) 70%);
+      padding: 140px 20px 60px 20px;
+      
+      /* Degradado lineal que termina en el color #f2f2f2 al final de la sección */
+      background: linear-gradient(180deg, #131317 0%, #0b0b0b 55%, #f2f2f2 100%);
       overflow: hidden;
     }
 
@@ -235,7 +236,7 @@
     }
 
     .hero-description {
-      color: #888888;
+      color: #aaaaaa;
       text-align: center;
       max-width: 580px;
       font-size: clamp(14px, 2vw, 16px);
@@ -303,7 +304,7 @@
                   opacity 0.4s ease, 
                   box-shadow 0.4s ease, 
                   filter 0.4s ease;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
       border: 1px solid rgba(255, 255, 255, 0.15);
       bottom: 0px;
       will-change: transform, opacity;
@@ -385,7 +386,7 @@
       .card:hover {
         z-index: 10 !important;
         transform: translateY(-30px) scale(1.08) rotate(0deg) !important;
-        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
         opacity: 1 !important;
         filter: none !important;
       }
@@ -493,10 +494,10 @@
   <header class="site-header" id="siteHeader">
     <div class="header-container">
       
-      <!-- Contenedor del Logo Principal -->
+      <!-- Contenedor del Logo Blanco -->
       <a href="#" class="logo-container">
-        <img src="assets/Logo%20principal-02.webp" 
-             alt="Gogó Logo Principal" 
+        <img src="https://cdn.shopify.com/s/files/1/0845/9576/9587/files/Logo_principal-02_b07cf7b9-a522-4ed7-89b5-a6cf58e8b0f2.webp?v=1785977438" 
+             alt="Gogó Logo Blanco" 
              class="logo-img">
       </a>
 
@@ -610,11 +611,9 @@
       const mobileToggle = document.getElementById('mobileToggle');
       const navMenu = document.getElementById('navMenu');
 
-      // Función ultra-compatible para medir el scroll
       const checkScroll = () => {
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
         
-        // Si bajamos más de 40px, añadimos la clase que desvanece
         if (scrollTop > 40) {
           header.classList.add('fade-out');
         } else {
@@ -622,7 +621,6 @@
         }
       };
 
-      // Ejecutar al cargar y escuchar el scroll
       checkScroll();
       window.addEventListener('scroll', checkScroll, { passive: true });
 
@@ -632,7 +630,6 @@
         });
       }
 
-      // Manejo de Interacción de las Tarjetas
       const wrapper = document.getElementById('cardsWrapper');
       const cards = document.querySelectorAll('.card');
 
