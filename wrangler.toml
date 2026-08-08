@@ -1,0 +1,8 @@
+name = "gogo-web"
+pages_build_output_dir = "."
+compatibility_date = "2026-08-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "gogo-web-db"
+database_id = "PENDIENTE_CREAR_EN_CLOUDFLARE"

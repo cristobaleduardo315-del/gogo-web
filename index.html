@@ -528,6 +528,7 @@
           <li><a href="#planes" class="nav-link">Planes</a></li>
           <li><a href="#como-funciona" class="nav-link">Cómo funciona</a></li>
           <li><a href="#preguntas" class="nav-link">Preguntas</a></li>
+          <li><a href="/login" class="nav-link">Iniciar sesión</a></li>
         </ul>
       </nav>
 
@@ -3004,8 +3005,11 @@
         </button>
         <p class="resumen-pago-nota" id="resumen-pago-nota">Pago seguro. Podrás cancelar cuando quieras.</p>
         <p class="resumen-pago-msg" id="resumen-pago-msg" style="display: none;">
-          Estamos activando los pagos en línea. Muy pronto podrás completar tu compra aquí mismo — mientras tanto, escríbenos y te ayudamos a activar tu plan.
+          Estamos activando los pagos en línea. Muy pronto podrás completar tu compra aquí mismo — mientras tanto, crea tu cuenta gratis y te ayudamos a activar tu plan.
         </p>
+        <a id="resumen-crear-cuenta" href="/registro?plan=start" class="resumen-pagar-btn" style="display:none;text-decoration:none;text-align:center;margin-top:10px;">
+          Crear mi cuenta
+        </a>
       </div>
     </div>
   </div>
@@ -3100,6 +3104,7 @@
     // la nota normal al reabrir/cambiar de plan.
     document.getElementById('resumen-pago-msg').style.display = 'none';
     document.getElementById('resumen-pago-nota').style.display = 'block';
+    document.getElementById('resumen-crear-cuenta').style.display = 'none';
 
     const section = document.getElementById('resumen-plan');
     section.style.display = 'block';
@@ -3116,6 +3121,9 @@
   function procesarPago() {
     document.getElementById('resumen-pago-nota').style.display = 'none';
     document.getElementById('resumen-pago-msg').style.display = 'block';
+    const crearCuentaBtn = document.getElementById('resumen-crear-cuenta');
+    crearCuentaBtn.href = '/registro?plan=' + (window.planSeleccionadoActual || 'start');
+    crearCuentaBtn.style.display = 'block';
   }
 </script>
 
