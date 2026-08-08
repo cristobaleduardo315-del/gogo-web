@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoGo — Panel de tu negocio</title>
+<style>
+  :root{
+    --lime:#ccff00;
+    --lime-dim:rgba(204,255,0,0.18);
+    --lime-text:#5c7a00;
+    --bg:#f4f4f2;
+    --panel:#ffffff;
+    --panel-2:#f7f7f4;
+    --border:#e6e6e1;
+    --text:#0b0b0b;
+    --text-dim:#6b6b6b;
+    --red:#d9383d;
+    --gray-chip:#eeeeea;
+    --gray-chip-text:#5c5c58;
+    --shadow:0 1px 2px rgba(11,11,11,0.04), 0 1px 12px rgba(11,11,11,0.03);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    display:flex;
+    min-height:100vh;
+  }
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{
+    width:240px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);
+    padding:28px 20px;display:flex;flex-direction:column;gap:32px;
+  }
+  .logo-mark{font-weight:800;font-size:22px;letter-spacing:-0.5px;display:flex;align-items:center;gap:2px;color:var(--text);}
+  .logo-mark span{color:var(--lime-text);}
+  .biz-banner{background:var(--panel-2);border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;align-items:center;gap:10px;}
+  .biz-banner .biz-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#ff9a3d,#ff5c3d);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0;color:#fff;}
+  .biz-banner .biz-name{font-size:13.5px;font-weight:800;}
+  .biz-banner .biz-plan{font-size:11px;color:var(--lime-text);font-weight:700;}
+  .nav-group{display:flex;flex-direction:column;gap:4px;}
+  .nav-label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin:14px 0 6px 10px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:var(--text-dim);font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;}
+  .nav-item.active{background:var(--lime-dim);color:var(--lime-text);}
+  .nav-item:not(.active):hover{background:var(--panel-2);color:var(--text);}
+  .sidebar-footer{margin-top:auto;padding-top:20px;border-top:1px solid var(--border);font-size:11.5px;color:var(--text-dim);}
+  .upgrade-box{background:var(--lime-dim);border:1px solid rgba(204,255,0,0.35);border-radius:14px;padding:14px;margin-top:10px;}
+  .upgrade-box .t{font-size:12.5px;font-weight:800;color:var(--lime-text);margin-bottom:4px;}
+  .upgrade-box .s{font-size:11.5px;color:#5c6b3d;margin-bottom:10px;}
+  .upgrade-btn{display:block;text-align:center;background:var(--lime);color:#000;font-size:12px;font-weight:800;padding:8px;border-radius:20px;text-decoration:none;}
+
+  /* ---------- MAIN ---------- */
+  .main{flex:1;padding:32px 40px;max-width:1400px;}
+  .topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;flex-wrap:wrap;gap:16px;}
+  .topbar h1{font-size:26px;font-weight:800;letter-spacing:-0.3px;}
+  .topbar p{color:var(--text-dim);font-size:14px;margin-top:4px;}
+  .range-select{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:9px 14px;border-radius:10px;font-size:13px;font-weight:600;}
+
+  .badge-demo{display:inline-flex;align-items:center;gap:6px;background:var(--lime-dim);color:var(--lime-text);font-size:11px;font-weight:700;padding:5px 10px;border-radius:20px;margin-bottom:14px;}
+  .badge-demo::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--lime-text);}
+
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+  .kpi-card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--shadow);}
+  .kpi-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .kpi-label{font-size:13px;color:var(--text-dim);font-weight:600;}
+  .kpi-icon{width:32px;height:32px;border-radius:9px;background:var(--lime-dim);display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .kpi-value{font-size:30px;font-weight:800;letter-spacing:-0.5px;}
+  .kpi-delta{font-size:12.5px;font-weight:700;margin-top:6px;display:flex;align-items:center;gap:4px;}
+  .kpi-delta.up{color:var(--lime-text);}
+  .kpi-delta.down{color:var(--red);}
+  .kpi-delta .vs{color:var(--text-dim);font-weight:500;}
+
+  .row-2{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:16px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:var(--shadow);}
+  .card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+  .card-head h3{font-size:15px;font-weight:700;}
+  .card-head .sub{font-size:12.5px;color:var(--text-dim);margin-top:2px;}
+  .legend-dot{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-dim);margin-right:14px;}
+  .legend-dot::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--dotcolor,var(--lime));}
+
+  /* Line chart (SVG, self-contained) */
+  .chart-wrap{width:100%;}
+  .chart-wrap svg{width:100%;height:180px;display:block;}
+  .chart-x-labels{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--text-dim);font-weight:600;padding:0 2px;}
+
+  /* Donut chart (pure CSS conic-gradient) */
+  .donut-wrap{position:relative;width:170px;height:170px;margin:0 auto;}
+  .donut{width:170px;height:170px;border-radius:50%;background:conic-gradient(var(--segs));}
+  .donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .donut-center::before{content:"";position:absolute;width:62%;height:62%;border-radius:50%;background:var(--panel);z-index:0;}
+  .donut-center-value{position:relative;z-index:1;font-size:20px;font-weight:800;}
+  .donut-center-label{position:relative;z-index:1;font-size:11px;color:var(--text-dim);}
+
+  .row-bottom{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-top:16px;}
+
+  table{width:100%;border-collapse:collapse;}
+  th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-dim);padding:0 12px 12px;font-weight:700;}
+  td{padding:13px 12px;font-size:13.5px;border-top:1px solid var(--border);}
+  tr:hover td{background:var(--panel-2);}
+  .cust-cell{display:flex;align-items:center;gap:10px;}
+  .cust-avatar{width:28px;height:28px;border-radius:50%;background:var(--gray-chip);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--lime-text);flex-shrink:0;}
+  .pts{color:var(--lime-text);font-weight:800;}
+  .muted{color:var(--text-dim);}
+
+  /* Plan card */
+  .plan-card{background:linear-gradient(145deg,#f7ffd6,#ffffff);border:1px solid rgba(204,255,0,0.45);}
+  .plan-name{font-size:20px;font-weight:800;color:var(--lime-text);margin-bottom:4px;}
+  .plan-price{font-size:13px;color:var(--text-dim);margin-bottom:18px;}
+  .plan-row{display:flex;justify-content:space-between;font-size:13px;padding:9px 0;border-top:1px solid var(--border);}
+  .plan-row:first-of-type{border-top:none;}
+  .plan-row .k{color:var(--text-dim);}
+  .plan-row .v{font-weight:700;}
+  .plan-cta{display:block;text-align:center;margin-top:16px;background:var(--lime);color:#000;font-weight:800;font-size:13px;padding:11px;border-radius:20px;text-decoration:none;}
+
+  @media (max-width:1100px){
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+    .row-2, .row-bottom{grid-template-columns:1fr;}
+    .sidebar{display:none;}
+    .main{padding:24px;}
+  }
+</style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="logo-mark">gogo<span>°</span></div>
+    <div class="biz-banner">
+      <div class="biz-avatar">BC</div>
+      <div>
+        <div class="biz-name">Burgers.co</div>
+        <div class="biz-plan">Plan Plus</div>
+      </div>
+    </div>
+    <nav class="nav-group">
+      <div class="nav-label">Tu panel</div>
+      <a class="nav-item active">📊 Resumen</a>
+      <a class="nav-item">🌐 Mi página</a>
+      <a class="nav-item">🎁 Fidelización</a>
+      <a class="nav-item">💳 Mi plan</a>
+      <div class="nav-label">Cuenta</div>
+      <a class="nav-item">⚙️ Configuración</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="upgrade-box">
+        <div class="t">Sube a Plan Pro</div>
+        <div class="s">Desbloquea catálogo ilimitado y reportes avanzados.</div>
+        <a class="upgrade-btn">Mejorar plan</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="badge-demo">Datos de ejemplo — pendiente de conectar métricas reales</div>
+    <div class="topbar">
+      <div>
+        <h1>Hola, Burgers.co 👋</h1>
+        <p>Así le está yendo a tu página digital</p>
+      </div>
+      <div class="range-select">Últimos 30 días ▾</div>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Visitas a tu página</span><span class="kpi-icon">👀</span></div>
+        <div class="kpi-value">1.284</div>
+        <div class="kpi-delta up">▲ 18% <span class="vs">vs mes anterior</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Clics a WhatsApp</span><span class="kpi-icon">💬</span></div>
+        <div class="kpi-value">342</div>
+        <div class="kpi-delta up">▲ 9% <span class="vs">vs mes anterior</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Escaneos de tu QR</span><span class="kpi-icon">📷</span></div>
+        <div class="kpi-value">156</div>
+        <div class="kpi-delta up">▲ 22% <span class="vs">vs mes anterior</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Clientes en fidelización</span><span class="kpi-icon">🎁</span></div>
+        <div class="kpi-value">89</div>
+        <div class="kpi-delta up">▲ 7 <span class="vs">nuevos este mes</span></div>
+      </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="row-2">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h3>Visitas a tu página</h3>
+            <div class="sub">Últimos 30 días</div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <svg id="visitsChart" viewBox="0 0 600 220" preserveAspectRatio="none"></svg>
+          <div class="chart-x-labels" id="visitsLabels"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h3>¿De dónde llegan?</h3>
+            <div class="sub">Origen del tráfico</div>
+          </div>
+        </div>
+        <div class="donut-wrap">
+          <div class="donut" id="sourceDonut"></div>
+          <div class="donut-center"><div class="donut-center-value">1.284</div><div class="donut-center-label">visitas</div></div>
+        </div>
+        <div style="margin-top:16px;display:flex;flex-wrap:wrap;">
+          <span class="legend-dot" style="--dotcolor:#ccff00">Código QR · 45%</span>
+          <span class="legend-dot" style="--dotcolor:#d9d9d3">Link directo · 35%</span>
+          <span class="legend-dot" style="--dotcolor:#ffb600">Redes sociales · 20%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOYALTY + PLAN -->
+    <div class="row-bottom">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h3>Tus clientes con más puntos</h3>
+            <div class="sub">Programa de fidelización</div>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Cliente</th><th>Visitas</th><th>Puntos</th><th>Última visita</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><div class="cust-cell"><div class="cust-avatar">MJ</div>María José</div></td>
+              <td class="muted">14</td>
+              <td class="pts">640 pts</td>
+              <td class="muted">Hace 2 días</td>
+            </tr>
+            <tr>
+              <td><div class="cust-cell"><div class="cust-avatar">AR</div>Andrés R.</div></td>
+              <td class="muted">11</td>
+              <td class="pts">510 pts</td>
+              <td class="muted">Hace 4 días</td>
+            </tr>
+            <tr>
+              <td><div class="cust-cell"><div class="cust-avatar">LP</div>Laura P.</div></td>
+              <td class="muted">9</td>
+              <td class="pts">420 pts</td>
+              <td class="muted">Hace 6 días</td>
+            </tr>
+            <tr>
+              <td><div class="cust-cell"><div class="cust-avatar">JG</div>Julián G.</div></td>
+              <td class="muted">8</td>
+              <td class="pts">365 pts</td>
+              <td class="muted">Hace 1 semana</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="display:flex;gap:24px;margin-top:18px;padding-top:16px;border-top:1px solid var(--border);">
+          <div><div class="muted" style="font-size:12px;">Puntos otorgados</div><div style="font-weight:800;font-size:16px;">2.340</div></div>
+          <div><div class="muted" style="font-size:12px;">Recompensas canjeadas</div><div style="font-weight:800;font-size:16px;">47</div></div>
+        </div>
+      </div>
+
+      <div class="card plan-card">
+        <div class="plan-name">Plan Plus</div>
+        <div class="plan-price">$39 / mes</div>
+        <div class="plan-row"><span class="k">Próxima renovación</span><span class="v">15 sept 2026</span></div>
+        <div class="plan-row"><span class="k">Método de pago</span><span class="v">•••• 6411</span></div>
+        <div class="plan-row"><span class="k">Estado</span><span class="v" style="color:var(--lime-text);">Activo</span></div>
+        <a class="plan-cta">Actualizar plan</a>
+      </div>
+    </div>
+  </main>
+
+<script>
+  // ---- Gráfico de línea (SVG, sin dependencias externas) ----
+  function drawLineChart(svgId, labelsId, data, labels){
+    const svg = document.getElementById(svgId);
+    const W = 600, H = 220, padTop = 16, padBottom = 16;
+    const max = Math.max(...data) * 1.15;
+    const min = 0;
+    const stepX = W / (data.length - 1);
+    const toY = v => padTop + (H - padTop - padBottom) * (1 - (v - min) / (max - min));
+
+    const points = data.map((v,i) => [i*stepX, toY(v)]);
+    const linePath = points.map((p,i) => (i===0?'M':'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    const areaPath = linePath + ` L${W},${H-padBottom} L0,${H-padBottom} Z`;
+
+    let gridLines = '';
+    for(let i=0;i<=3;i++){
+      const y = padTop + (H - padTop - padBottom) * (i/3);
+      gridLines += `<line x1="0" y1="${y.toFixed(1)}" x2="${W}" y2="${y.toFixed(1)}" stroke="#ececE7" stroke-width="1"/>`;
+    }
+
+    svg.innerHTML = `
+      <defs>
+        <linearGradient id="grad-${svgId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ccff00" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#ccff00" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      ${gridLines}
+      <path d="${areaPath}" fill="url(#grad-${svgId})" stroke="none"/>
+      <path d="${linePath}" fill="none" stroke="#ccff00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    `;
+
+    if(labelsId && labels){
+      document.getElementById(labelsId).innerHTML = labels.map(l => `<span>${l}</span>`).join('');
+    }
+  }
+
+  // ---- Dona (CSS conic-gradient) ----
+  function drawDonut(elId, segments){
+    const total = segments.reduce((s,x)=>s+x.value,0);
+    let acc = 0;
+    const stops = segments.map(seg => {
+      const start = (acc/total)*360;
+      acc += seg.value;
+      const end = (acc/total)*360;
+      return `${seg.color} ${start}deg ${end}deg`;
+    }).join(', ');
+    document.getElementById(elId).style.setProperty('--segs', stops);
+  }
+
+  const visits = [22,25,19,28,31,26,24,33,29,35,38,30,27,41,36,39,44,32,29,40,45,38,42,50,47,41,46,52,49,55];
+  drawLineChart('visitsChart', 'visitsLabels', visits, ['Sem 1','Sem 2','Sem 3','Sem 4']);
+  drawDonut('sourceDonut', [
+    {value:45, color:'#ccff00'},
+    {value:35, color:'#d9d9d3'},
+    {value:20, color:'#ffb600'}
+  ]);
+</script>
+</body>
+</html>
