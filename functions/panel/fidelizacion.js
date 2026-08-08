@@ -1,27 +1,37 @@
 import { requireMerchant } from "../lib/auth.js";
 import { renderShell, escapeHtml } from "../lib/layout.js";
-import { getLealtadSummary, getLealtadCustomers } from "../lib/internalApi.js";
+import {
+  getLealtadSummary,
+  getLealtadCustomers,
+  getLealtadPromotions,
+  sendLealtadPromotion,
+} from "../lib/internalApi.js";
 
-export async function onRequestGet({ request, env }) {
-  const merchant = await requireMerchant(request, env);
-  if (!merchant) return new Response(null, { status: 302, headers: { Location: "/login" } });
+function html(body, status = 200) {
+  return new Response(body, { status, headers: { "Content-Type": "text/html; charset=utf-8" } });
+}
 
-  if (!merchant.lealtad_merchant_id) {
-    const body = `
-      <div class="topbar"><div><h1>Fidelización</h1><p>Tu programa de sellos.</p></div></div>
-      <div class="card"><p class="muted">Tu cuenta todavía no tiene un programa de fidelización vinculado. Escríbenos para activarlo.</p></div>`;
-    return new Response(renderShell({ title: "Fidelización", active: "fidelizacion", merchant, bodyHtml: body }), {
-      headers: { "Content-Type": "text/html; charset=utf-8" },
-    });
+function formatDate(ts) {
+  return new Date(ts).toLocaleString("es", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+}
+
+function promoRows(promotions) {
+  if (!promotions.length) {
+    return '<tr><td colspan="3" class="muted">Todavía no has enviado ninguna promoción.</td></tr>';
   }
+  return promotions
+    .map((p) => {
+      const isSent = p.status === "sent";
+      return `<tr>
+        <td>${escapeHtml(formatDate(p.created_at))}</td>
+        <td><strong>${escapeHtml(p.header)}</strong><div class="muted" style="font-size:12px;">${escapeHtml(p.body)}</div></td>
+        <td style="color:${isSent ? "var(--lime-text)" : "var(--red)"};font-weight:700;">${isSent ? "Enviada" : "Error"}</td>
+      </tr>`;
+    })
+    .join("");
+}
 
-  const [summaryRes, customersRes] = await Promise.all([
-    getLealtadSummary(env, merchant.lealtad_merchant_id),
-    getLealtadCustomers(env, merchant.lealtad_merchant_id),
-  ]);
-  const summary = summaryRes.ok ? summaryRes.data : null;
-  const customers = customersRes.ok ? customersRes.data.customers || [] : [];
-
+function pageBody(merchant, { summary, customers, promotions, notice, error }) {
   const rows = customers
     .map(
       (c) => `<tr>
@@ -32,11 +42,14 @@ export async function onRequestGet({ request, env }) {
     )
     .join("");
 
-  const body = `
+  return `
     <div class="topbar">
       <div><h1>Fidelización</h1><p>${summary ? escapeHtml(summary.stamps_required + " sellos = " + summary.reward_text) : ""}</p></div>
       <a class="btn" href="/panel/fidelizacion/ir">Escanear cliente</a>
     </div>
+
+    ${notice ? `<div class="notice">${escapeHtml(notice)}</div>` : ""}
+    ${error ? `<div class="error">${escapeHtml(error)}</div>` : ""}
 
     <div class="kpi-grid" style="grid-template-columns:repeat(2,1fr);">
       <div class="kpi-card">
@@ -49,6 +62,27 @@ export async function onRequestGet({ request, env }) {
       </div>
     </div>
 
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-head">
+        <div><h3>Enviar promoción</h3><div class="sub">Llega como notificación push a quien tenga la tarjeta guardada en Google Wallet${summary ? ` (de tus ${summary.customer_count} clientes inscritos)` : ""}.</div></div>
+      </div>
+      <form class="inline" method="POST" action="/panel/fidelizacion">
+        <label>Título</label>
+        <input name="header" required maxlength="30" placeholder="Ej. 2x1 hoy">
+        <label>Mensaje</label>
+        <textarea name="body" required maxlength="300" placeholder="Ej. Trae a un amigo y ambos comen gratis en su segunda visita."></textarea>
+        <button class="btn" type="submit" style="margin-top:18px;">Enviar notificación</button>
+      </form>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="card-head"><div><h3>Historial de promociones</h3><div class="sub">Últimas enviadas</div></div></div>
+      <table>
+        <thead><tr><th>Fecha</th><th>Promoción</th><th>Estado</th></tr></thead>
+        <tbody>${promoRows(promotions)}</tbody>
+      </table>
+    </div>
+
     <div class="card" data-wide>
       <div class="card-head">
         <div><h3>Clientes</h3><div class="sub">Los más recientes</div></div>
@@ -59,8 +93,73 @@ export async function onRequestGet({ request, env }) {
         <tbody>${rows || '<tr><td colspan="3" class="muted">Todavía no tienes clientes inscritos.</td></tr>'}</tbody>
       </table>
     </div>`;
+}
 
-  return new Response(renderShell({ title: "Fidelización", active: "fidelizacion", merchant, bodyHtml: body }), {
-    headers: { "Content-Type": "text/html; charset=utf-8" },
-  });
+async function loadData(env, merchant) {
+  const [summaryRes, customersRes, promosRes] = await Promise.all([
+    getLealtadSummary(env, merchant.lealtad_merchant_id),
+    getLealtadCustomers(env, merchant.lealtad_merchant_id),
+    getLealtadPromotions(env, merchant.lealtad_merchant_id),
+  ]);
+  return {
+    summary: summaryRes.ok ? summaryRes.data : null,
+    customers: customersRes.ok ? customersRes.data.customers || [] : [],
+    promotions: promosRes.ok ? promosRes.data.promotions || [] : [],
+  };
+}
+
+export async function onRequestGet({ request, env }) {
+  const merchant = await requireMerchant(request, env);
+  if (!merchant) return new Response(null, { status: 302, headers: { Location: "/login" } });
+
+  if (!merchant.lealtad_merchant_id) {
+    const body = `
+      <div class="topbar"><div><h1>Fidelización</h1><p>Tu programa de sellos.</p></div></div>
+      <div class="card"><p class="muted">Tu cuenta todavía no tiene un programa de fidelización vinculado. Escríbenos para activarlo.</p></div>`;
+    return html(renderShell({ title: "Fidelización", active: "fidelizacion", merchant, bodyHtml: body }));
+  }
+
+  const data = await loadData(env, merchant);
+  return html(renderShell({ title: "Fidelización", active: "fidelizacion", merchant, bodyHtml: pageBody(merchant, data) }));
+}
+
+export async function onRequestPost({ request, env }) {
+  const merchant = await requireMerchant(request, env);
+  if (!merchant) return new Response(null, { status: 302, headers: { Location: "/login" } });
+  if (!merchant.lealtad_merchant_id) {
+    return new Response(null, { status: 302, headers: { Location: "/panel/fidelizacion" } });
+  }
+
+  const formData = await request.formData();
+  const header = String(formData.get("header") || "").trim();
+  const body = String(formData.get("body") || "").trim();
+
+  if (!header || !body) {
+    const data = await loadData(env, merchant);
+    return html(
+      renderShell({
+        title: "Fidelización",
+        active: "fidelizacion",
+        merchant,
+        bodyHtml: pageBody(merchant, { ...data, error: "Completa el título y el mensaje." }),
+      }),
+      400
+    );
+  }
+
+  const result = await sendLealtadPromotion(env, merchant.lealtad_merchant_id, { header, body });
+  const data = await loadData(env, merchant);
+  return html(
+    renderShell({
+      title: "Fidelización",
+      active: "fidelizacion",
+      merchant,
+      bodyHtml: pageBody(merchant, {
+        ...data,
+        notice: result.ok ? "Promoción enviada." : undefined,
+        error: result.ok ? undefined : result.data?.error || "No se pudo enviar la notificación.",
+      }),
+    }),
+    result.ok ? 200 : 502
+  );
 }
