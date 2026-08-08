@@ -2,10 +2,17 @@ name = "gogo-web"
 pages_build_output_dir = "."
 compatibility_date = "2026-08-01"
 
+# Se usa la URL de workers.dev (en vez de https://app.soygogo.com) para las
+# llamadas server-to-server hacia gogo-lealtad: al estar app.soygogo.com en
+# la MISMA zona de Cloudflare que este proyecto (soygogo.com), un POST
+# saliente desde esta Function hacia esa zona termina en un 502 "Host Error"
+# que ni siquiera llega a ejecutar el código de gogo-lealtad (confirmado:
+# cero requests en sus logs) ni se puede atrapar con try/catch. La URL
+# *.workers.dev vive en otra zona y evita ese problema por completo.
+[vars]
+GOGO_LEALTAD_URL = "https://gogo-lealtad.cristobaleduardo315.workers.dev"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "gogo-web-db"
-database_id = "85f43cff-9e3d-4476-94c9-9aed7d7ce249"
-
-[vars]
-GOGO_LEALTAD_URL = "https://app.soygogo.com"
+database_id = "PENDIENTE_CREAR_EN_CLOUDFLARE"
