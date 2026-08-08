@@ -5,4 +5,4 @@ compatibility_date = "2026-08-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "gogo-web-db"
-database_id = "PENDIENTE_CREAR_EN_CLOUDFLARE"
+database_id = "85f43cff-9e3d-4476-94c9-9aed7d7ce249"
