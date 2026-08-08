@@ -62,6 +62,21 @@ export async function updateLealtadConfig(env, lealtadMerchantId, config) {
   });
 }
 
+// Historial de promociones (notificaciones push) enviadas a las tarjetas de
+// Google Wallet guardadas.
+export async function getLealtadPromotions(env, lealtadMerchantId) {
+  return call(env, `/internal/api/merchants/${lealtadMerchantId}/promos`);
+}
+
+// Envía una promo: Google Wallet la reparte como notificación push a todos
+// los dispositivos que tengan guardada una tarjeta de este comercio.
+export async function sendLealtadPromotion(env, lealtadMerchantId, { header, body }) {
+  return call(env, `/internal/api/merchants/${lealtadMerchantId}/promos`, {
+    method: "POST",
+    body: { header, body },
+  });
+}
+
 // Pide un token de sesión ya autenticado para mandar al dueño directo al
 // panel real de fidelización (SSO) sin pedirle login de nuevo.
 export async function getLealtadSsoUrl(env, lealtadMerchantId) {
