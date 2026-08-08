@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GoGo — Panel de Administración</title>
+<style>
+  :root{
+    --lime:#ccff00;
+    --lime-dim:rgba(204,255,0,0.18);
+    --lime-text:#5c7a00;
+    --bg:#f4f4f2;
+    --panel:#ffffff;
+    --panel-2:#f7f7f4;
+    --border:#e6e6e1;
+    --text:#0b0b0b;
+    --text-dim:#6b6b6b;
+    --red:#d9383d;
+    --red-dim:rgba(217,56,61,0.10);
+    --amber:#b47900;
+    --amber-dim:rgba(255,182,0,0.18);
+    --gray-chip:#eeeeea;
+    --gray-chip-text:#5c5c58;
+    --shadow:0 1px 2px rgba(11,11,11,0.04), 0 1px 12px rgba(11,11,11,0.03);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    display:flex;
+    min-height:100vh;
+  }
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{
+    width:240px;
+    flex-shrink:0;
+    background:var(--panel);
+    border-right:1px solid var(--border);
+    padding:28px 20px;
+    display:flex;
+    flex-direction:column;
+    gap:32px;
+  }
+  .logo-mark{
+    font-weight:800;
+    font-size:22px;
+    letter-spacing:-0.5px;
+    display:flex;
+    align-items:center;
+    gap:2px;
+    color:var(--text);
+  }
+  .logo-mark span{color:var(--lime-text);}
+  .nav-group{display:flex;flex-direction:column;gap:4px;}
+  .nav-label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin:14px 0 6px 10px;}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px;border-radius:10px;
+    color:var(--text-dim);font-size:14px;font-weight:600;
+    text-decoration:none;cursor:pointer;
+  }
+  .nav-item.active{background:var(--lime-dim);color:var(--lime-text);}
+  .nav-item:not(.active):hover{background:var(--panel-2);color:var(--text);}
+  .sidebar-footer{margin-top:auto;padding-top:20px;border-top:1px solid var(--border);}
+  .admin-chip{display:flex;align-items:center;gap:10px;}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--lime);color:#000;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;}
+  .admin-chip-text{font-size:13px;}
+  .admin-chip-text .name{font-weight:700;}
+  .admin-chip-text .role{color:var(--text-dim);font-size:11px;}
+
+  /* ---------- MAIN ---------- */
+  .main{flex:1;padding:32px 40px;max-width:1400px;}
+  .topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;flex-wrap:wrap;gap:16px;}
+  .topbar h1{font-size:26px;font-weight:800;letter-spacing:-0.3px;}
+  .topbar p{color:var(--text-dim);font-size:14px;margin-top:4px;}
+  .range-select{
+    background:var(--panel);border:1px solid var(--border);color:var(--text);
+    padding:9px 14px;border-radius:10px;font-size:13px;font-weight:600;
+    display:flex;align-items:center;gap:8px;
+  }
+
+  .badge-demo{
+    display:inline-flex;align-items:center;gap:6px;background:var(--lime-dim);color:var(--lime-text);
+    font-size:11px;font-weight:700;padding:5px 10px;border-radius:20px;margin-bottom:14px;
+    letter-spacing:0.02em;
+  }
+  .badge-demo::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--lime-text);}
+
+  /* KPI cards */
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+  .kpi-card{
+    background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--shadow);
+  }
+  .kpi-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+  .kpi-label{font-size:13px;color:var(--text-dim);font-weight:600;}
+  .kpi-icon{width:32px;height:32px;border-radius:9px;background:var(--lime-dim);display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .kpi-value{font-size:30px;font-weight:800;letter-spacing:-0.5px;}
+  .kpi-delta{font-size:12.5px;font-weight:700;margin-top:6px;display:flex;align-items:center;gap:4px;}
+  .kpi-delta.up{color:var(--lime-text);}
+  .kpi-delta.down{color:var(--red);}
+  .kpi-delta .vs{color:var(--text-dim);font-weight:500;}
+
+  /* Charts row */
+  .row-2{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:16px;}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:var(--shadow);}
+  .card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+  .card-head h3{font-size:15px;font-weight:700;}
+  .card-head .sub{font-size:12.5px;color:var(--text-dim);margin-top:2px;}
+  .legend-dot{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-dim);margin-right:14px;}
+  .legend-dot::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--dotcolor,var(--lime));}
+
+  /* Line chart (SVG, self-contained) */
+  .chart-wrap{width:100%;}
+  .chart-wrap svg{width:100%;height:180px;display:block;}
+  .chart-x-labels{display:flex;justify-content:space-between;margin-top:8px;font-size:11px;color:var(--text-dim);font-weight:600;padding:0 2px;}
+
+  /* Donut chart (pure CSS conic-gradient) */
+  .donut-wrap{position:relative;width:170px;height:170px;margin:0 auto;}
+  .donut{width:170px;height:170px;border-radius:50%;background:conic-gradient(var(--segs));}
+  .donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .donut-center::before{content:"";position:absolute;width:62%;height:62%;border-radius:50%;background:var(--panel);z-index:0;}
+  .donut-center-value{position:relative;z-index:1;font-size:22px;font-weight:800;}
+  .donut-center-label{position:relative;z-index:1;font-size:11px;color:var(--text-dim);}
+
+  /* Funnel */
+  .funnel-row{display:flex;flex-direction:column;gap:10px;}
+  .funnel-item{display:flex;align-items:center;gap:14px;}
+  .funnel-label{width:130px;font-size:12.5px;color:var(--text-dim);font-weight:600;flex-shrink:0;}
+  .funnel-bar-wrap{flex:1;background:var(--gray-chip);border-radius:8px;height:34px;position:relative;overflow:hidden;}
+  .funnel-bar{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--lime),#a3d900);min-width:6px;}
+  .funnel-value{width:54px;text-align:right;font-size:13px;font-weight:800;color:var(--text);flex-shrink:0;}
+  .funnel-pct{width:48px;text-align:right;font-size:12.5px;color:var(--text-dim);font-weight:700;flex-shrink:0;}
+
+  /* Table */
+  table{width:100%;border-collapse:collapse;}
+  th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-dim);padding:0 12px 12px;font-weight:700;}
+  td{padding:14px 12px;font-size:13.5px;border-top:1px solid var(--border);}
+  tr:hover td{background:var(--panel-2);}
+  .biz-cell{display:flex;align-items:center;gap:10px;}
+  .biz-avatar{width:30px;height:30px;border-radius:8px;background:var(--gray-chip);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--lime-text);flex-shrink:0;}
+  .plan-tag{font-size:11px;font-weight:800;padding:4px 9px;border-radius:20px;display:inline-block;}
+  .plan-start{background:var(--gray-chip);color:var(--gray-chip-text);}
+  .plan-plus{background:var(--lime-dim);color:var(--lime-text);}
+  .plan-pro{background:var(--amber-dim);color:var(--amber);}
+  .status-dot{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;}
+  .status-dot::before{content:"";width:7px;height:7px;border-radius:50%;}
+  .status-activo::before{background:var(--lime-text);}
+  .status-activo{color:var(--lime-text);}
+  .status-pendiente::before{background:var(--amber);}
+  .status-pendiente{color:var(--amber);}
+  .status-vencido::before{background:var(--red);}
+  .status-vencido{color:var(--red);}
+  .muted{color:var(--text-dim);}
+
+  .row-bottom{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-top:16px;}
+
+  .alert-item{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--panel-2);border-radius:12px;margin-bottom:10px;border:1px solid var(--border);}
+  .alert-item:last-child{margin-bottom:0;}
+  .alert-left{display:flex;align-items:center;gap:10px;}
+  .alert-icon{width:30px;height:30px;border-radius:8px;background:var(--red-dim);color:var(--red);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+  .alert-icon.warn{background:var(--amber-dim);color:var(--amber);}
+  .alert-title{font-size:13px;font-weight:700;}
+  .alert-sub{font-size:11.5px;color:var(--text-dim);}
+  .alert-cta{font-size:12px;font-weight:700;color:var(--lime-text);text-decoration:none;background:var(--lime-dim);padding:6px 12px;border-radius:20px;}
+
+  @media (max-width:1100px){
+    .kpi-grid{grid-template-columns:repeat(2,1fr);}
+    .row-2, .row-bottom{grid-template-columns:1fr;}
+    .sidebar{display:none;}
+    .main{padding:24px;}
+  }
+</style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="logo-mark">gogo<span>°</span></div>
+    <nav class="nav-group">
+      <div class="nav-label">Panel</div>
+      <a class="nav-item active">📊 Resumen</a>
+      <a class="nav-item">🏬 Clientes</a>
+      <a class="nav-item">💳 Planes &amp; Pagos</a>
+      <a class="nav-item">📈 Reportes</a>
+      <div class="nav-label">Cuenta</div>
+      <a class="nav-item">⚙️ Configuración</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="admin-chip">
+        <div class="avatar">CR</div>
+        <div class="admin-chip-text">
+          <div class="name">Cristobal</div>
+          <div class="role">Administrador</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="badge-demo">Datos de ejemplo — pendiente de conectar métricas reales</div>
+    <div class="topbar">
+      <div>
+        <h1>Panel de Administración</h1>
+        <p>Visión general de los negocios que usan GoGo</p>
+      </div>
+      <div class="range-select">Últimos 30 días ▾</div>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Clientes activos</span><span class="kpi-icon">🏬</span></div>
+        <div class="kpi-value">128</div>
+        <div class="kpi-delta up">▲ 12.3% <span class="vs">vs mes anterior</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Nuevos clientes</span><span class="kpi-icon">✨</span></div>
+        <div class="kpi-value">14</div>
+        <div class="kpi-delta up">▲ 4 <span class="vs">más que el mes pasado</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Ingresos mensuales (MRR)</span><span class="kpi-icon">💰</span></div>
+        <div class="kpi-value">$3.842</div>
+        <div class="kpi-delta up">▲ 9.1% <span class="vs">vs mes anterior</span></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Retención</span><span class="kpi-icon">🔁</span></div>
+        <div class="kpi-value">94%</div>
+        <div class="kpi-delta down">▼ 1.2% <span class="vs">vs mes anterior</span></div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div class="row-2">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h3>Crecimiento de clientes</h3>
+            <div class="sub">Clientes activos acumulados por mes</div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <svg id="growthChart" viewBox="0 0 600 220" preserveAspectRatio="none"></svg>
+          <div class="chart-x-labels" id="growthLabels"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h3>Clientes por plan</h3>
+            <div class="sub">Distribución actual</div>
+          </div>
+        </div>
+        <div class="donut-wrap">
+          <div class="donut" id="planDonut"></div>
+          <div class="donut-center"><div class="donut-center-value">128</div><div class="donut-center-label">clientes</div></div>
+        </div>
+        <div style="margin-top:16px;display:flex;flex-wrap:wrap;">
+          <span class="legend-dot" style="--dotcolor:#d9d9d3">Start · 58</span>
+          <span class="legend-dot" style="--dotcolor:#ccff00">Plus · 51</span>
+          <span class="legend-dot" style="--dotcolor:#ffb600">Pro · 19</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FUNNEL + TABLE -->
+    <div class="row-bottom">
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h3>Últimos clientes registrados</h3>
+            <div class="sub">Negocios que se unieron recientemente a GoGo</div>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Negocio</th><th>Plan</th><th>Fecha</th><th>Estado</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="biz-cell"><div class="biz-avatar">BC</div>Burgers.co</div></td>
+              <td><span class="plan-tag plan-plus">Plus</span></td>
+              <td class="muted">05 ago 2026</td>
+              <td><span class="status-dot status-activo">Activo</span></td>
+            </tr>
+            <tr>
+              <td><div class="biz-cell"><div class="biz-avatar">GL</div>Glue Studio</div></td>
+              <td><span class="plan-tag plan-pro">Pro</span></td>
+              <td class="muted">03 ago 2026</td>
+              <td><span class="status-dot status-activo">Activo</span></td>
+            </tr>
+            <tr>
+              <td><div class="biz-cell"><div class="biz-avatar">DB</div>Dame Burgers</div></td>
+              <td><span class="plan-tag plan-start">Start</span></td>
+              <td class="muted">01 ago 2026</td>
+              <td><span class="status-dot status-pendiente">Pago pendiente</span></td>
+            </tr>
+            <tr>
+              <td><div class="biz-cell"><div class="biz-avatar">WB</div>West Burger</div></td>
+              <td><span class="plan-tag plan-plus">Plus</span></td>
+              <td class="muted">29 jul 2026</td>
+              <td><span class="status-dot status-activo">Activo</span></td>
+            </tr>
+            <tr>
+              <td><div class="biz-cell"><div class="biz-avatar">CL</div>Cloudy</div></td>
+              <td><span class="plan-tag plan-start">Start</span></td>
+              <td class="muted">27 jul 2026</td>
+              <td><span class="status-dot status-vencido">Vencido</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <h3>Alertas</h3>
+            <div class="sub">Requieren atención</div>
+          </div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-left">
+            <div class="alert-icon">⚠️</div>
+            <div>
+              <div class="alert-title">3 pagos pendientes</div>
+              <div class="alert-sub">Vencen en los próximos 3 días</div>
+            </div>
+          </div>
+          <a class="alert-cta">Ver</a>
+        </div>
+        <div class="alert-item">
+          <div class="alert-left">
+            <div class="alert-icon warn">⏳</div>
+            <div>
+              <div class="alert-title">5 planes por renovar</div>
+              <div class="alert-sub">En los próximos 7 días</div>
+            </div>
+          </div>
+          <a class="alert-cta">Ver</a>
+        </div>
+        <div class="alert-item">
+          <div class="alert-left">
+            <div class="alert-icon">⚠️</div>
+            <div>
+              <div class="alert-title">1 cliente vencido</div>
+              <div class="alert-sub">Cloudy — hace 12 días</div>
+            </div>
+          </div>
+          <a class="alert-cta">Ver</a>
+        </div>
+
+        <div class="card-head" style="margin-top:26px;">
+          <div>
+            <h3>Embudo de conversión</h3>
+            <div class="sub">Visitas → Selección de plan → Pago</div>
+          </div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-item">
+            <div class="funnel-label">Visitas al sitio</div>
+            <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:100%"></div></div>
+            <div class="funnel-value">3.240</div>
+            <div class="funnel-pct">100%</div>
+          </div>
+          <div class="funnel-item">
+            <div class="funnel-label">Eligieron un plan</div>
+            <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:38%"></div></div>
+            <div class="funnel-value">412</div>
+            <div class="funnel-pct">12.7%</div>
+          </div>
+          <div class="funnel-item">
+            <div class="funnel-label">Pagaron</div>
+            <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:14%"></div></div>
+            <div class="funnel-value">128</div>
+            <div class="funnel-pct">3.9%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<script>
+  // ---- Gráfico de línea (SVG, sin dependencias externas) ----
+  function drawLineChart(svgId, labelsId, data, labels){
+    const svg = document.getElementById(svgId);
+    const W = 600, H = 220, padTop = 16, padBottom = 16;
+    const max = Math.max(...data) * 1.15;
+    const min = 0;
+    const stepX = W / (data.length - 1);
+    const toY = v => padTop + (H - padTop - padBottom) * (1 - (v - min) / (max - min));
+
+    const points = data.map((v,i) => [i*stepX, toY(v)]);
+    const linePath = points.map((p,i) => (i===0?'M':'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    const areaPath = linePath + ` L${W},${H-padBottom} L0,${H-padBottom} Z`;
+
+    let gridLines = '';
+    for(let i=0;i<=3;i++){
+      const y = padTop + (H - padTop - padBottom) * (i/3);
+      gridLines += `<line x1="0" y1="${y.toFixed(1)}" x2="${W}" y2="${y.toFixed(1)}" stroke="#ececE7" stroke-width="1"/>`;
+    }
+
+    const dots = points.map(p => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="#ccff00"/>`).join('');
+
+    svg.innerHTML = `
+      <defs>
+        <linearGradient id="grad-${svgId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ccff00" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="#ccff00" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      ${gridLines}
+      <path d="${areaPath}" fill="url(#grad-${svgId})" stroke="none"/>
+      <path d="${linePath}" fill="none" stroke="#ccff00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      ${dots}
+    `;
+
+    if(labelsId && labels){
+      document.getElementById(labelsId).innerHTML = labels.map(l => `<span>${l}</span>`).join('');
+    }
+  }
+
+  // ---- Dona (CSS conic-gradient) ----
+  function drawDonut(elId, segments){
+    // segments: [{value, color}]
+    const total = segments.reduce((s,x)=>s+x.value,0);
+    let acc = 0;
+    const stops = segments.map(seg => {
+      const start = (acc/total)*360;
+      acc += seg.value;
+      const end = (acc/total)*360;
+      return `${seg.color} ${start}deg ${end}deg`;
+    }).join(', ');
+    document.getElementById(elId).style.setProperty('--segs', stops);
+  }
+
+  drawLineChart('growthChart', 'growthLabels', [62,71,85,97,114,128], ['Mar','Abr','May','Jun','Jul','Ago']);
+  drawDonut('planDonut', [
+    {value:58, color:'#d9d9d3'},
+    {value:51, color:'#ccff00'},
+    {value:19, color:'#ffb600'}
+  ]);
+</script>
+</body>
+</html>
