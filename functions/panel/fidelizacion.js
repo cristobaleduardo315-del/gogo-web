@@ -147,19 +147,36 @@ export async function onRequestPost({ request, env }) {
     );
   }
 
-  const result = await sendLealtadPromotion(env, merchant.lealtad_merchant_id, { header, body });
-  const data = await loadData(env, merchant);
-  return html(
-    renderShell({
-      title: "Fidelización",
-      active: "fidelizacion",
-      merchant,
-      bodyHtml: pageBody(merchant, {
-        ...data,
-        notice: result.ok ? "Promoción enviada." : undefined,
-        error: result.ok ? undefined : result.data?.error || "No se pudo enviar la notificación.",
+  try {
+    const result = await sendLealtadPromotion(env, merchant.lealtad_merchant_id, { header, body });
+    const data = await loadData(env, merchant);
+    return html(
+      renderShell({
+        title: "Fidelización",
+        active: "fidelizacion",
+        merchant,
+        bodyHtml: pageBody(merchant, {
+          ...data,
+          notice: result.ok ? "Promoción enviada." : undefined,
+          error: result.ok ? undefined : result.data?.error || "No se pudo enviar la notificación.",
+        }),
       }),
-    }),
-    result.ok ? 200 : 502
-  );
+      result.ok ? 200 : 502
+    );
+  } catch (err) {
+    // Última red de seguridad: si algo truena de forma inesperada (p. ej.
+    // gogo-lealtad no responde), mostramos un error legible en vez de tumbar
+    // toda la página con un 502 genérico.
+    console.error("POST /panel/fidelizacion:", err.message || err);
+    const data = await loadData(env, merchant).catch(() => ({ summary: null, customers: [], promotions: [] }));
+    return html(
+      renderShell({
+        title: "Fidelización",
+        active: "fidelizacion",
+        merchant,
+        bodyHtml: pageBody(merchant, { ...data, error: "No se pudo enviar la notificación. Intenta de nuevo." }),
+      }),
+      502
+    );
+  }
 }
