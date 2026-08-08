@@ -129,24 +129,7 @@ export async function onRequestPost(context) {
   // de dejar que Cloudflare lo convierta en un 502 "Host Error" genérico sin
   // detalle. Se retira en cuanto encontremos la causa raíz.
   try {
-    // DEBUG TEMPORAL 2: aislar si CUALQUIER fetch saliente síncrono durante
-    // un POST por el dominio custom truena, probando contra un host externo
-    // trivial antes de tocar nuestra lógica real.
-    try {
-      const pingController = new AbortController();
-      const pingTimeout = setTimeout(() => pingController.abort(), 8000);
-      const pingRes = await fetch("https://example.com/", { signal: pingController.signal });
-      clearTimeout(pingTimeout);
-      return new Response("DEBUG PING OK: status=" + pingRes.status, {
-        status: 200,
-        headers: { "Content-Type": "text/plain; charset=utf-8" },
-      });
-    } catch (pingErr) {
-      return new Response(
-        "DEBUG PING FAILED:\n" + (pingErr && pingErr.stack ? pingErr.stack : String(pingErr)),
-        { status: 200, headers: { "Content-Type": "text/plain; charset=utf-8" } }
-      );
-    }
+    return await handlePost(context);
   } catch (err) {
     console.error("POST /panel/fidelizacion (debug):", err && err.stack ? err.stack : err);
     return new Response("DEBUG ERROR:\n" + (err && err.stack ? err.stack : String(err)), {
