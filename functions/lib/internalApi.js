@@ -8,14 +8,30 @@
 async function call(env, path, { method = "GET", body } = {}) {
   const base = env.GOGO_LEALTAD_URL;
   if (!base) throw new Error("Falta configurar GOGO_LEALTAD_URL.");
-  const res = await fetch(`${base.replace(/\/$/, "")}${path}`, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      "X-Internal-Secret": env.INTERNAL_API_SECRET || "",
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  // Si gogo-lealtad no responde (timeout, DNS, conexión caída, etc.) fetch()
+  // puede lanzar en vez de devolver una Response — antes eso tumbaba toda la
+  // función de gogo-web (502 genérico de Cloudflare) en vez de dejar que la
+  // página muestre un error legible. Con AbortController evitamos además que
+  // una llamada colgada deje la página cargando indefinidamente.
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  let res;
+  try {
+    res = await fetch(`${base.replace(/\/$/, "")}${path}`, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Internal-Secret": env.INTERNAL_API_SECRET || "",
+      },
+      body: body ? JSON.stringify(body) : undefined,
+      signal: controller.signal,
+    });
+  } catch (err) {
+    console.error("internalApi call failed:", path, err.message || err);
+    return { ok: false, status: 0, data: null };
+  } finally {
+    clearTimeout(timeout);
+  }
   let data = null;
   try {
     data = await res.json();
