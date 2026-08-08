@@ -59,7 +59,7 @@ const SHELL_STYLES = `
     width:240px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);
     padding:28px 20px;display:flex;flex-direction:column;gap:32px;
   }
-  .sidebar-logo{height:24px;width:24px;object-fit:contain;display:block;}
+  .sidebar-logo{height:72px;width:72px;object-fit:contain;display:block;}
   .biz-banner{background:var(--panel-2);border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;align-items:center;gap:10px;}
   .biz-banner .biz-avatar{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#ff9a3d,#ff5c3d);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0;color:#fff;}
   .biz-banner .biz-name{font-size:13.5px;font-weight:800;}
@@ -142,7 +142,7 @@ const AUTH_STYLES = `
     background:#f4f4f2;color:#0b0b0b;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
   }
   .auth-card{background:#fff;border:1px solid #e6e6e1;border-radius:18px;padding:32px;width:100%;max-width:400px;box-shadow:0 1px 2px rgba(11,11,11,0.04), 0 1px 12px rgba(11,11,11,0.03);}
-  .auth-card img{height:26px;display:block;margin-bottom:20px;}
+  .auth-card img{height:78px;display:block;margin-bottom:20px;}
   .auth-card h1{font-size:22px;font-weight:800;margin-bottom:6px;letter-spacing:-0.3px;}
   .auth-card p.sub{color:#6b6b6b;font-size:13.5px;margin-bottom:22px;}
   .auth-card label{display:block;font-size:12.5px;font-weight:700;color:#6b6b6b;margin:14px 0 6px;}
