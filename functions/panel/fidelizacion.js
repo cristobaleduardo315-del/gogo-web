@@ -138,18 +138,16 @@ export async function onRequestGet({ request, env }) {
 }
 
 export async function onRequestPost(context) {
-  // DEBUG TEMPORAL: envolvemos TODO el handler (incluyendo requireMerchant y
-  // el parseo del form) para capturar y mostrar cualquier error real en vez
-  // de dejar que Cloudflare lo convierta en un 502 "Host Error" genérico sin
-  // detalle. Se retira en cuanto encontremos la causa raíz.
+  // Red de seguridad: cualquier excepción no prevista dentro de handlePost
+  // (antes causaba un 502 "Host Error" genérico de Cloudflare, sin detalle
+  // y sin poder atraparse) se registra en los logs y el usuario vuelve al
+  // formulario con un mensaje legible en vez de una pantalla rota.
   try {
     return await handlePost(context);
   } catch (err) {
-    console.error("POST /panel/fidelizacion (debug):", err && err.stack ? err.stack : err);
-    return new Response("DEBUG ERROR:\n" + (err && err.stack ? err.stack : String(err)), {
-      status: 200,
-      headers: { "Content-Type": "text/plain; charset=utf-8" },
-    });
+    console.error("POST /panel/fidelizacion:", err && err.stack ? err.stack : err);
+    const qs = "error=" + encodeURIComponent("Ocurrió un error inesperado. Intenta de nuevo.");
+    return new Response(null, { status: 302, headers: { Location: "/panel/fidelizacion?" + qs } });
   }
 }
 
