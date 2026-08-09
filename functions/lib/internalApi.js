@@ -62,8 +62,8 @@ export async function verifyLealtadCredentials(env, { email, password }) {
 // Diagnóstico temporal para depurar "No se puede cargar este pase" en
 // Google Wallet — ver nota en gogo-lealtad/src/lib/googleWallet.js. Quitar
 // junto con /panel/wallet-debug una vez resuelto.
-export async function getWalletDebug(env, lealtadMerchantId) {
-  return call(env, `/internal/api/merchants/${lealtadMerchantId}/wallet-debug`);
+export async function getWalletDebug(env, lealtadMerchantId, { fix = false } = {}) {
+  return call(env, `/internal/api/merchants/${lealtadMerchantId}/wallet-debug${fix ? "?fix=1" : ""}`);
 }
 
 export async function getLealtadSummary(env, lealtadMerchantId) {
