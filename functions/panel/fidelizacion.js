@@ -62,8 +62,14 @@ function pageBody(env, merchant, { summary, customers, promotions, config, notic
 
   const lealtadBase = (env.GOGO_LEALTAD_URL || "").replace(/\/$/, "");
   const cfg = config || {};
-  const logoSrc = cfg.logo_url ? `${lealtadBase}${cfg.logo_url}` : null;
-  const stampIconSrc = cfg.stamp_icon_url ? `${lealtadBase}${cfg.stamp_icon_url}` : null;
+  // ?v=timestamp evita que el navegador muestre el logo/ícono viejo desde su
+  // caché justo después de guardar uno nuevo (el endpoint que los sirve se
+  // cachea 24h para que Google Wallet no lo reconsulte de más). Sin esto, el
+  // dueño del negocio ve la vista previa sin cambios y piensa que no se guardó,
+  // aunque sí se haya actualizado del lado del servidor.
+  const cacheBust = Date.now();
+  const logoSrc = cfg.logo_url ? `${lealtadBase}${cfg.logo_url}?v=${cacheBust}` : null;
+  const stampIconSrc = cfg.stamp_icon_url ? `${lealtadBase}${cfg.stamp_icon_url}?v=${cacheBust}` : null;
   const joinUrl = summary ? `${lealtadBase}/c/${summary.slug}/unirse` : null;
 
   return `
