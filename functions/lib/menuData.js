@@ -38,18 +38,26 @@ export async function logQrScan(db, merchantId, now) {
   await db.prepare("INSERT INTO qr_scans (merchant_id, scanned_at) VALUES (?, ?)").bind(merchantId, now).run();
 }
 
-// Escaneos agrupados por día (YYYY-MM-DD) desde `sinceTs` -- lo que consume
-// el dashboard (Resumen) para graficar. Si la tabla todavía no existe
-// (falta correr la migración 0008), el caller debe atrapar el error y
-// mostrar la gráfica vacía en vez de tumbar el dashboard.
-export async function listQrScansByDay(db, merchantId, sinceTs) {
+// Escaneos agrupados por día (YYYY-MM-DD) entre `sinceTs` (inclusive) y
+// `untilTs` (exclusivo, opcional) -- lo que consume el dashboard (Resumen)
+// para graficar, ya sea con un rango de fechas específico o con "los
+// últimos N días" (sin `untilTs`). Si la tabla todavía no existe (falta
+// correr la migración 0008), el caller debe atrapar el error y mostrar la
+// gráfica vacía en vez de tumbar el dashboard.
+export async function listQrScansByDay(db, merchantId, sinceTs, untilTs) {
+  const conditions = ["merchant_id = ?", "scanned_at >= ?"];
+  const params = [merchantId, sinceTs];
+  if (untilTs) {
+    conditions.push("scanned_at < ?");
+    params.push(untilTs);
+  }
   const { results } = await db
     .prepare(
       `SELECT date(scanned_at / 1000, 'unixepoch') AS day, COUNT(*) AS count
-       FROM qr_scans WHERE merchant_id = ? AND scanned_at >= ?
+       FROM qr_scans WHERE ${conditions.join(" AND ")}
        GROUP BY day ORDER BY day ASC`
     )
-    .bind(merchantId, sinceTs)
+    .bind(...params)
     .all();
   return results;
 }

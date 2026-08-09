@@ -34,6 +34,22 @@ export function buildDailySeries(menuRows, lealtadRows, days = 14) {
   return out;
 }
 
+// Igual que buildDailySeries, pero para un rango de fechas explícito
+// (fromDate/toDate en YYYY-MM-DD, inclusive) -- lo que usa el selector de
+// fechas del dashboard en vez de un número fijo de "últimos N días".
+export function buildDateRangeSeries(menuRows, lealtadRows, fromDate, toDate) {
+  const menuMap = new Map((menuRows || []).map((r) => [r.day, Number(r.count) || 0]));
+  const lealtadMap = new Map((lealtadRows || []).map((r) => [r.day, Number(r.count) || 0]));
+  const out = [];
+  const start = new Date(`${fromDate}T00:00:00Z`);
+  const end = new Date(`${toDate}T00:00:00Z`);
+  for (let d = start; d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+    const day = d.toISOString().slice(0, 10);
+    out.push({ day, menu: menuMap.get(day) || 0, fidelizacion: lealtadMap.get(day) || 0 });
+  }
+  return out;
+}
+
 const COLOR_MENU = "#3d4eac";
 const COLOR_FIDELIZACION = "#ccff00";
 
@@ -64,6 +80,11 @@ export function qrScansChartSvg(series) {
     })
     .join("");
 
+  // Con rangos largos (p. ej. 90 días) no caben todas las etiquetas de
+  // fecha sin encimarse -- se muestra solo 1 de cada `labelEvery` días,
+  // siempre incluyendo el último para que se vea el día más reciente.
+  const labelEvery = n > 20 ? Math.ceil(n / 15) : 1;
+
   const bars = series
     .map((d, i) => {
       const gx = padLeft + i * groupW;
@@ -83,7 +104,11 @@ export function qrScansChartSvg(series) {
       const fidBar = d.fidelizacion
         ? `<rect x="${fidX.toFixed(1)}" y="${fidY.toFixed(1)}" width="${barW.toFixed(1)}" height="${Math.max(fidH, 2).toFixed(1)}" rx="2" fill="${COLOR_FIDELIZACION}"><title>${label} · Fidelización: ${d.fidelizacion}</title></rect>`
         : "";
-      return `${menuBar}${fidBar}<text x="${(gx + groupW / 2).toFixed(1)}" y="${height - 10}" text-anchor="middle" font-size="11" fill="#6b6b6b">${label}</text>`;
+      const showLabel = i % labelEvery === 0 || i === series.length - 1;
+      const labelText = showLabel
+        ? `<text x="${(gx + groupW / 2).toFixed(1)}" y="${height - 10}" text-anchor="middle" font-size="11" fill="#6b6b6b">${label}</text>`
+        : "";
+      return `${menuBar}${fidBar}${labelText}`;
     })
     .join("");
 

@@ -95,8 +95,14 @@ export async function sendLealtadPromotion(env, lealtadMerchantId, { header, bod
 
 // Escaneos del QR de inscripción al programa de fidelización, agrupados
 // por día -- para la gráfica de estadísticas del dashboard (Resumen).
-export async function getLealtadQrScans(env, lealtadMerchantId, days = 30) {
-  return call(env, `/internal/api/merchants/${lealtadMerchantId}/qr-scans?days=${encodeURIComponent(days)}`);
+// Acepta un rango explícito { from, to } (YYYY-MM-DD) para el selector de
+// fechas, o { days } como atajo de "últimos N días".
+export async function getLealtadQrScans(env, lealtadMerchantId, { from, to, days } = {}) {
+  const qs =
+    from && to
+      ? `from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
+      : `days=${encodeURIComponent(days || 30)}`;
+  return call(env, `/internal/api/merchants/${lealtadMerchantId}/qr-scans?${qs}`);
 }
 
 // Pide un token de sesión ya autenticado para mandar al dueño directo al
