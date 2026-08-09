@@ -1,8 +1,16 @@
 // Ruta que codifica el QR que se muestra en /panel/menu: suma 1 al contador
-// de escaneos y redirige al menú público real (/menu/:slug). Separarla del
-// enlace directo permite distinguir "alguien escaneó el QR" de cualquier
-// otra forma de llegar al menú (compartir el link, buscarlo, etc.) sin
-// tocar la página pública en sí.
+// de escaneos y redirige al menú público real. Separarla del enlace directo
+// permite distinguir "alguien escaneó el QR" de cualquier otra forma de
+// llegar al menú (compartir el link, buscarlo, etc.) sin tocar la página
+// pública en sí.
+//
+// El QR siempre se genera con este host (soygogo.com, ver panel/menu.js —
+// es el único host donde vive el panel), pero el destino final SÍ respeta
+// el dominio propio del negocio si tiene uno configurado (menu_pages.
+// custom_domain, ver migrations/0006): ahí es donde su cliente final debe
+// aterrizar, no en soygogo.com. El middleware raíz (functions/_middleware.js)
+// ya sirve la portada del negocio en la raíz "/" de ese dominio, así que
+// basta con mandarlo ahí.
 import { getMenuPageBySlug, incrementQrScan } from "../../lib/menuData.js";
 
 export async function onRequestGet({ params, env }) {
@@ -12,5 +20,6 @@ export async function onRequestGet({ params, env }) {
     return new Response(null, { status: 302, headers: { Location: "/menu/" + encodeURIComponent(slug) } });
   }
   await incrementQrScan(env.DB, slug);
-  return new Response(null, { status: 302, headers: { Location: "/menu/" + encodeURIComponent(slug) } });
+  const destination = page.custom_domain ? `https://${page.custom_domain}/` : "/menu/" + encodeURIComponent(slug);
+  return new Response(null, { status: 302, headers: { Location: destination } });
 }
