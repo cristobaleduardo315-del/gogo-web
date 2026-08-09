@@ -106,11 +106,11 @@ function pageBody(env, merchant, { summary, customers, promotions, config, notic
         <input name="brand_color" type="color" value="${escapeHtml(cfg.brand_color || (summary ? summary.brand_color : "#ccff00"))}" style="height:44px;padding:4px;">
         <label>Logo del negocio</label>
         ${logoSrc ? `<img src="${escapeHtml(logoSrc)}" alt="Logo actual" style="width:56px;height:56px;object-fit:contain;border-radius:10px;border:1px solid var(--border);margin-bottom:8px;background:#fff;">` : ""}
-        <input name="logo_file" type="file" accept="image/*">
+        <input name="logo_file" type="file" accept="image/png,image/jpeg,image/gif">
         <label>Ícono del sello</label>
         ${stampIconSrc ? `<img src="${escapeHtml(stampIconSrc)}" alt="Ícono actual" style="width:56px;height:56px;object-fit:contain;border-radius:10px;border:1px solid var(--border);margin-bottom:8px;background:#fff;">` : ""}
-        <input name="stamp_icon_file" type="file" accept="image/*">
-        <p class="muted" style="margin-top:10px;font-size:12px;">Imágenes hasta 2MB. Si no subes una nueva, se conserva la actual.</p>
+        <input name="stamp_icon_file" type="file" accept="image/png,image/jpeg,image/gif">
+        <p class="muted" style="margin-top:10px;font-size:12px;">Imágenes PNG, JPG o GIF hasta 2MB (no .webp). Si no subes una nueva, se conserva la actual.</p>
         <button class="btn" type="submit" style="margin-top:18px;">Guardar tarjeta</button>
       </form>
     </div>
@@ -264,12 +264,22 @@ async function handlePersonalizar({ formData, env, merchant }) {
     return new Response(null, { status: 302, headers: { Location: "/panel/fidelizacion?" + qs } });
   }
 
+  // Formatos aceptados para logo/ícono de sello: el banner de sellos de
+  // Google Wallet se dibuja del lado del servidor incrustando esta imagen
+  // dentro de un SVG que después se convierte a PNG (resvg) — esa librería
+  // sabe leer PNG/JPG/GIF pero NO webp. Si se sube un .webp (cada vez más
+  // común: así exportan capturas de pantalla varios celulares/navegadores),
+  // el archivo se guardaba igual pero la imagen quedaba invisible en la
+  // tarjeta sin ningún error visible — daba la impresión de que "no se
+  // actualiza". Se valida el formato acá para avisar de una vez.
+  const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/gif"];
+
   let logoImage = null;
   let logoMime = null;
   const logoFile = formData.get("logo_file");
   if (logoFile && typeof logoFile === "object" && logoFile.size > 0) {
-    if (!logoFile.type || !logoFile.type.startsWith("image/")) {
-      const qs = "error=" + encodeURIComponent("El logo debe ser una imagen.");
+    if (!logoFile.type || !ALLOWED_IMAGE_TYPES.includes(logoFile.type)) {
+      const qs = "error=" + encodeURIComponent("El logo debe ser una imagen PNG, JPG o GIF (no se aceptan .webp).");
       return new Response(null, { status: 302, headers: { Location: "/panel/fidelizacion?" + qs } });
     }
     if (logoFile.size > MAX_IMAGE_BYTES) {
@@ -284,8 +294,8 @@ async function handlePersonalizar({ formData, env, merchant }) {
   let stampIconMime = null;
   const stampFile = formData.get("stamp_icon_file");
   if (stampFile && typeof stampFile === "object" && stampFile.size > 0) {
-    if (!stampFile.type || !stampFile.type.startsWith("image/")) {
-      const qs = "error=" + encodeURIComponent("El ícono de sello debe ser una imagen.");
+    if (!stampFile.type || !ALLOWED_IMAGE_TYPES.includes(stampFile.type)) {
+      const qs = "error=" + encodeURIComponent("El ícono de sello debe ser una imagen PNG, JPG o GIF (no se aceptan .webp).");
       return new Response(null, { status: 302, headers: { Location: "/panel/fidelizacion?" + qs } });
     }
     if (stampFile.size > MAX_IMAGE_BYTES) {
