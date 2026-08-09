@@ -43,5 +43,12 @@ export async function onRequest({ request, env, next }) {
   if (path === "/") return renderMenuHome(env, row.slug);
   if (path === "/carta") return renderMenuCarta(env, row.slug);
 
-  return next();
+  // Cualquier otra ruta (panel, login, admin, registro, etc.) NO se sirve en
+  // el dominio propio del negocio: la gestión del negocio (dashboard,
+  // fidelización) siempre se hace desde soygogo.com, nunca desde el dominio
+  // público. Si alguien llega a /panel/... en westburgers.com (por un link
+  // viejo, un bookmark, o probando manualmente), lo mandamos a la misma
+  // ruta en soygogo.com en vez de servirla acá.
+  const redirectUrl = new URL(url.pathname + url.search, "https://soygogo.com");
+  return new Response(null, { status: 302, headers: { Location: redirectUrl.toString() } });
 }
