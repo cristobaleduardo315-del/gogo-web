@@ -20,10 +20,14 @@ const ICON_INSTAGRAM = `<svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.58
 const ICON_TIKTOK = `<svg viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>`;
 const ICON_PIN_FILLED = `<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>`;
 
-// Íconos de la lista de info (trazo, no relleno).
+// Íconos de la lista de info (trazo, no relleno) — calcados 1:1 del bloque
+// original: tipo de negocio (tienda), horario (reloj), frase (check), año
+// de fundación (estrella) y ubicación (pin).
+const ICON_STORE = `<svg class="wb-info-ic" viewBox="0 0 24 24"><path d="M3 11a9 6 0 0 1 18 0z"/><path d="M3 13h18"/><path d="M4 17h16v1a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg>`;
 const ICON_CLOCK = `<svg class="wb-info-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>`;
+const ICON_CHECK = `<svg class="wb-info-ic" viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>`;
+const ICON_STAR_STROKE = `<svg class="wb-info-ic" viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg>`;
 const ICON_PIN_STROKE = `<svg class="wb-info-ic" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>`;
-const ICON_PHONE = `<svg class="wb-info-ic" viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 01-2.2 2 19.8 19.8 0 01-8.6-3.1 19.5 19.5 0 01-6-6A19.8 19.8 0 012.1 4.2 2 2 0 014 2h3a2 2 0 012 1.7c.1.9.3 1.8.6 2.7a2 2 0 01-.5 2.1L7.9 9.7a16 16 0 006 6l1.2-1.2a2 2 0 012.1-.5c.9.3 1.8.5 2.7.6a2 2 0 011.7 2z"/></svg>`;
 
 function pageHtml({ page, merchant, bizPage }) {
   const v = themeVars(page);
@@ -31,10 +35,15 @@ function pageHtml({ page, merchant, bizPage }) {
   const dirLink = mapsLink(bizPage && bizPage.address);
   const cartaUrl = `/menu/${page.slug}/carta`;
 
+  // Las 3 primeras (tipo de negocio, frase, año) las configura GoGo; horario
+  // y ubicación salen de "Mi página" (business_page), que el negocio ya
+  // administra desde su panel.
   const infoLines = [];
+  if (page.info_title) infoLines.push({ icon: ICON_STORE, text: page.info_title, title: true });
   if (bizPage && bizPage.hours_json) infoLines.push({ icon: ICON_CLOCK, text: bizPage.hours_json });
+  if (page.slogan_line) infoLines.push({ icon: ICON_CHECK, text: page.slogan_line });
+  if (page.founded_year) infoLines.push({ icon: ICON_STAR_STROKE, text: `Estd. ${page.founded_year}` });
   if (bizPage && bizPage.address) infoLines.push({ icon: ICON_PIN_STROKE, text: bizPage.address });
-  if (bizPage && bizPage.phone) infoLines.push({ icon: ICON_PHONE, text: bizPage.phone });
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -73,6 +82,8 @@ ${FONT_LINKS}
   .wb-cta-alt:hover svg{fill:var(--theme);}
   .wb-info{display:flex;flex-direction:column;gap:9px;padding-top:26px;border-top:1px solid rgba(245,230,200,0.3);}
   .wb-info p{font-family:'Sora',sans-serif;font-size:clamp(12px,3.2vw,14px);font-weight:700;color:var(--cream);letter-spacing:0.04em;margin:0;line-height:1.6;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .wb-info-title{font-size:clamp(13px,3.8vw,16px)!important;color:#ffffff!important;letter-spacing:0.1em!important;text-transform:uppercase;}
+  .wb-info-title .wb-info-ic{stroke:#ffffff;}
   .wb-info-ic{width:17px;height:17px;flex-shrink:0;fill:none;stroke:var(--cream);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
   footer{max-width:520px;margin:20px auto 0;padding:0 20px;text-align:center;color:rgba(245,230,200,0.6);font-size:12px;position:relative;z-index:1;}
   footer a{color:inherit;}
@@ -112,7 +123,7 @@ ${FONT_LINKS}
 
       ${
         infoLines.length
-          ? `<div class="wb-info">${infoLines.map((l) => `<p>${l.icon}<span>${escapeHtml(l.text)}</span></p>`).join("")}</div>`
+          ? `<div class="wb-info">${infoLines.map((l) => `<p${l.title ? ' class="wb-info-title"' : ""}>${l.icon}<span>${escapeHtml(l.text)}</span></p>`).join("")}</div>`
           : ""
       }
     </div>
