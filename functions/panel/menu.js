@@ -9,6 +9,7 @@ import {
   formatCOP,
   slugify,
 } from "../lib/menuData.js";
+import { qrSvg, qrSvgDataUrl } from "../lib/qr.js";
 
 function html(body, status = 200) {
   return new Response(body, { status, headers: { "Content-Type": "text/html; charset=utf-8" } });
@@ -17,6 +18,14 @@ function html(body, status = 200) {
 function publicMenuUrl(request, slug) {
   const url = new URL(request.url);
   return `${url.protocol}//${url.host}/menu/${slug}`;
+}
+
+// El QR no codifica el enlace público directo, sino esta ruta intermedia
+// (/menu/:slug/qr) que suma 1 al contador de escaneos y de ahí redirige al
+// menú real — ver functions/menu/[slug]/qr.js.
+function qrTrackingUrl(request, slug) {
+  const url = new URL(request.url);
+  return `${url.protocol}//${url.host}/menu/${slug}/qr`;
 }
 
 function pageBody(merchant, { page, categories, products, request, notice, error }) {
@@ -102,6 +111,27 @@ function pageBody(merchant, { page, categories, products, request, notice, error
         <input name="whatsapp_phone" value="${escapeHtml((page && page.whatsapp_phone) || "")}" placeholder="Ej. 573001234567">
         <button class="btn" type="submit" style="margin-top:18px;">Guardar</button>
       </form>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;max-width:640px;">
+      <div class="card-head">
+        <div><h3>Código QR de tu menú</h3><div class="sub">Imprímelo y ponlo en las mesas: tus clientes lo escanean y llegan directo a tu menú.</div></div>
+      </div>
+      ${
+        !page
+          ? `<p class="muted" style="margin-bottom:14px;">Guarda tu enlace público arriba para activar el QR.</p>`
+          : ""
+      }
+      <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+        <div style="background:#fff;padding:10px;border-radius:12px;border:1px solid var(--border);flex-shrink:0;line-height:0;">
+          ${qrSvg(qrTrackingUrl(request, slug))}
+        </div>
+        <div style="flex:1;min-width:160px;">
+          <div class="muted" style="font-size:13px;">Veces escaneado</div>
+          <div style="font-size:32px;font-weight:800;margin:4px 0 14px;">${page ? page.qr_scan_count || 0 : 0}</div>
+          <a class="btn ghost" href="${qrSvgDataUrl(qrTrackingUrl(request, slug))}" download="qr-menu-${escapeHtml(slug)}.svg">Descargar QR</a>
+        </div>
+      </div>
     </div>
 
     <div class="card" style="margin-bottom:16px;max-width:640px;">
