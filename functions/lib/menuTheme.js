@@ -152,6 +152,20 @@ export const FOOD_ICON_DEFS = `<svg width="0" height="0" style="position:absolut
       <path d="M32 30v14"/><path d="M32 34l-10 6"/><path d="M32 34l10 6"/>
       <path d="M32 44l-8 12"/><path d="M32 44l8 12"/>
     </symbol>
+    <symbol id="ic-cart" viewBox="0 0 24 24">
+      <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+    </symbol>
+    <symbol id="ic-plus" viewBox="0 0 24 24">
+      <path d="M12 5v14M5 12h14"/>
+    </symbol>
+    <symbol id="ic-trash" viewBox="0 0 24 24">
+      <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+    </symbol>
+    <symbol id="ic-wa" viewBox="0 0 24 24">
+      <path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.3A10 10 0 1 0 12 2z"/>
+      <path d="M8.5 8c-.3 0-.6.1-.8.4-.3.3-.9.9-.9 2.1s.9 2.4 1 2.6c.1.2 1.8 2.9 4.5 3.9 2.2.9 2.7.7 3.2.7.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2-.1-.1-.3-.2-.6-.3z"/>
+    </symbol>
   </defs>
 </svg>`;
 
@@ -179,4 +193,12 @@ export function categoryIconId(categoryName) {
     if (pattern.test(normalized)) return id;
   }
   return "ic-star";
+}
+
+// Convierte un valor a un literal JS seguro para incrustar dentro de un
+// atributo HTML de doble comilla (ej. onclick="addToCart(..., ATTR, ...)").
+// JSON.stringify ya escapa comillas simples/backslashes correctamente para
+// JS; solo falta neutralizar la comilla doble que delimita el atributo.
+export function jsAttr(value) {
+  return JSON.stringify(value).replace(/"/g, "&quot;");
 }
