@@ -4087,5 +4087,68 @@
 
   </div>
 </footer>
-</body>
+  <script>
+        // ================= Notificacion por geolocalizacion (Gogo) =================
+        // Configura aqui los datos reales del restaurante antes de publicar.
+        const GOGO_GEO_CONFIG = {
+                restaurantLat: 0, // <-- Reemplazar con la latitud real del restaurante
+                restaurantLng: 0, // <-- Reemplazar con la longitud real del restaurante
+                radiusKm: 10,
+                title: 'Estas cerca de nosotros!',
+                body: 'Estas a menos de 10 km. Ven a visitarnos y aprovecha nuestras promociones!',
+                checkIntervalMs: 300000
+        };
+
+        function gogoDistanciaKm(lat1, lon1, lat2, lon2) {
+                const R = 6371;
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                          Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                          Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                return R * c;
+        }
+
+        let gogoNotificado = false;
+
+        function gogoRevisarUbicacion() {
+                if (!('geolocation' in navigator)) return;
+                navigator.geolocation.getCurrentPosition(function (pos) {
+                          const distancia = gogoDistanciaKm(pos.coords.latitude, pos.coords.longitude, GOGO_GEO_CONFIG.restaurantLat, GOGO_GEO_CONFIG.restaurantLng);
+                          if (distancia <= GOGO_GEO_CONFIG.radiusKm) {
+                                      if (!gogoNotificado) {
+                                                    gogoNotificado = true;
+                                                    gogoMostrarNotificacion();
+                                      }
+                          } else {
+                                      gogoNotificado = false;
+                          }
+                }, function () {}, { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
+        }
+
+        function gogoMostrarNotificacion() {
+                if (!('Notification' in window) || Notification.permission !== 'granted') return;
+                new Notification(GOGO_GEO_CONFIG.title, { body: GOGO_GEO_CONFIG.body, icon: 'assets/facivon2.webp' });
+        }
+
+        function gogoIniciarGeolocalizacion() {
+                if (!('geolocation' in navigator) || !('Notification' in window)) return;
+                if (Notification.permission === 'granted') {
+                          gogoRevisarUbicacion();
+                          setInterval(gogoRevisarUbicacion, GOGO_GEO_CONFIG.checkIntervalMs);
+                } else if (Notification.permission !== 'denied') {
+                          Notification.requestPermission().then(function (permiso) {
+                                      if (permiso === 'granted') {
+                                                    gogoRevisarUbicacion();
+                                                    setInterval(gogoRevisarUbicacion, GOGO_GEO_CONFIG.checkIntervalMs);
+                                      }
+                          });
+                }
+        }
+
+        document.addEventListener('DOMContentLoaded', gogoIniciarGeolocalizacion);
+  </script>
+
+  </body>
 </html>
