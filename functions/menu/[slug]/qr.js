@@ -11,7 +11,7 @@
 // aterrizar, no en soygogo.com. El middleware raíz (functions/_middleware.js)
 // ya sirve la portada del negocio en la raíz "/" de ese dominio, así que
 // basta con mandarlo ahí.
-import { getMenuPageBySlug, incrementQrScan } from "../../lib/menuData.js";
+import { getMenuPageBySlug, incrementQrScan, logQrScan } from "../../lib/menuData.js";
 
 export async function onRequestGet({ params, env }) {
   const slug = String(params.slug || "").toLowerCase();
@@ -20,6 +20,13 @@ export async function onRequestGet({ params, env }) {
     return new Response(null, { status: 302, headers: { Location: "/menu/" + encodeURIComponent(slug) } });
   }
   await incrementQrScan(env.DB, slug);
+  // El log con fecha (para la gráfica del dashboard) no debe tumbar el
+  // redirect si la migración 0008 todavía no corrió en producción.
+  try {
+    await logQrScan(env.DB, page.merchant_id, Date.now());
+  } catch (err) {
+    console.error("logQrScan (menu):", err.message || err);
+  }
   const destination = page.custom_domain ? `https://${page.custom_domain}/` : "/menu/" + encodeURIComponent(slug);
   return new Response(null, { status: 302, headers: { Location: destination } });
 }
