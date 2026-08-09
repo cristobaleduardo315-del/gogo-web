@@ -102,6 +102,13 @@ function pageBody(merchant, { page, categories, products, request, notice, error
         <input name="whatsapp_phone" value="${escapeHtml((page && page.whatsapp_phone) || "")}" placeholder="Ej. 573001234567">
         <label>Color de tu marca</label>
         <input name="theme_color" type="color" value="${escapeHtml((page && page.theme_color) || "#3d47a0")}" style="height:42px;padding:4px;">
+        <label>Logo (URL de una imagen, opcional)</label>
+        <input name="logo_url" type="url" value="${escapeHtml((page && page.logo_url) || "")}" placeholder="https://…">
+        ${
+          page && page.logo_url
+            ? `<img src="${escapeHtml(page.logo_url)}" alt="" style="height:44px;margin-top:6px;border-radius:8px;">`
+            : ""
+        }
         <button class="btn" type="submit" style="margin-top:18px;">Guardar</button>
       </form>
     </div>
@@ -152,6 +159,7 @@ export async function onRequestPost({ request, env }) {
   const tagline = String(formData.get("tagline") || "").trim();
   const whatsappPhone = String(formData.get("whatsapp_phone") || "").trim();
   const themeColor = String(formData.get("theme_color") || "#3d47a0").trim();
+  const logoUrl = String(formData.get("logo_url") || "").trim();
 
   if (!rawSlug) {
     const qs = "error=" + encodeURIComponent("El enlace de tu menú no puede quedar vacío.");
@@ -162,7 +170,7 @@ export async function onRequestPost({ request, env }) {
     return new Response(null, { status: 302, headers: { Location: "/panel/menu?" + qs } });
   }
 
-  await saveMenuPage(env.DB, merchant.id, { slug: rawSlug, themeColor, tagline, whatsappPhone });
+  await saveMenuPage(env.DB, merchant.id, { slug: rawSlug, themeColor, tagline, whatsappPhone, logoUrl });
   const qs = "notice=" + encodeURIComponent("Cambios guardados.");
   return new Response(null, { status: 302, headers: { Location: "/panel/menu?" + qs } });
 }
