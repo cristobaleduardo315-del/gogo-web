@@ -159,14 +159,24 @@ export async function onRequestPost({ request, env }) {
     return new Response(null, { status: 302, headers: { Location: "/panel/menu?" + qs } });
   }
 
-  // El color de marca y el logo ya NO se editan desde acá — los configura
-  // GoGo al montar el negocio. Se preservan tal cual estén guardados para
-  // no perderlos al guardar el resto de ajustes.
+  // El color de marca, el logo y los enlaces sociales ya NO se editan desde
+  // acá — los configura GoGo al montar el negocio. Se preservan tal cual
+  // estén guardados para no perderlos al guardar el resto de ajustes.
   const existingPage = await getMenuPage(env.DB, merchant.id);
   const themeColor = (existingPage && existingPage.theme_color) || "#3d4eac";
   const logoUrl = (existingPage && existingPage.logo_url) || null;
+  const instagramUrl = (existingPage && existingPage.instagram_url) || null;
+  const tiktokUrl = (existingPage && existingPage.tiktok_url) || null;
 
-  await saveMenuPage(env.DB, merchant.id, { slug: rawSlug, themeColor, tagline, whatsappPhone, logoUrl });
+  await saveMenuPage(env.DB, merchant.id, {
+    slug: rawSlug,
+    themeColor,
+    tagline,
+    whatsappPhone,
+    logoUrl,
+    instagramUrl,
+    tiktokUrl,
+  });
   const qs = "notice=" + encodeURIComponent("Cambios guardados.");
   return new Response(null, { status: 302, headers: { Location: "/panel/menu?" + qs } });
 }
