@@ -34,20 +34,36 @@ export async function isSlugTaken(db, slug, excludingMerchantId) {
   return !!row;
 }
 
-export async function saveMenuPage(db, merchantId, { slug, themeColor, tagline, whatsappPhone, logoUrl }) {
+export async function saveMenuPage(
+  db,
+  merchantId,
+  { slug, themeColor, tagline, whatsappPhone, logoUrl, instagramUrl, tiktokUrl }
+) {
   await db
     .prepare(
-      `INSERT INTO menu_pages (merchant_id, slug, theme_color, tagline, whatsapp_phone, logo_url, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
+      `INSERT INTO menu_pages (merchant_id, slug, theme_color, tagline, whatsapp_phone, logo_url, instagram_url, tiktok_url, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(merchant_id) DO UPDATE SET
          slug = excluded.slug,
          theme_color = excluded.theme_color,
          tagline = excluded.tagline,
          whatsapp_phone = excluded.whatsapp_phone,
          logo_url = excluded.logo_url,
+         instagram_url = excluded.instagram_url,
+         tiktok_url = excluded.tiktok_url,
          updated_at = excluded.updated_at`
     )
-    .bind(merchantId, slug, themeColor, tagline || null, whatsappPhone || null, logoUrl || null, Date.now())
+    .bind(
+      merchantId,
+      slug,
+      themeColor,
+      tagline || null,
+      whatsappPhone || null,
+      logoUrl || null,
+      instagramUrl || null,
+      tiktokUrl || null,
+      Date.now()
+    )
     .run();
 }
 
