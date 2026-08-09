@@ -74,7 +74,7 @@ function pageBody(merchant, { page, categories, products, request, notice, error
               <a class="btn ghost" href="/panel/menu/producto?categoria=${cat.id}">+ Producto</a>
               <details style="position:relative;">
                 <summary class="btn ghost" style="list-style:none;cursor:pointer;">⋯</summary>
-                <div style="position:absolute;right:0;top:36px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px;box-shadow:var(--shadow);z-index:5;min-width:220px;">
+                <div style="position:absolute;right:0;top:36px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px;box-shadow:var(--shadow);z-index:5;min-width:220px;max-width:calc(100vw - 32px);">
                   <form method="POST" action="/panel/menu/categoria/${cat.id}" style="margin-bottom:8px;">
                     <input type="hidden" name="intent" value="rename">
                     <label style="font-size:11.5px;font-weight:700;color:var(--text-dim);">Renombrar</label>
@@ -89,10 +89,12 @@ function pageBody(merchant, { page, categories, products, request, notice, error
               </details>
             </div>
           </div>
+          <div class="table-scroll">
           <table>
             <thead><tr><th>Producto</th><th>Precio</th><th></th></tr></thead>
             <tbody>${productRows || `<tr><td colspan="3" class="muted">Todavía no tienes productos en esta categoría.</td></tr>`}</tbody>
           </table>
+          </div>
         </div>`;
     })
     .join("");

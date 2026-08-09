@@ -81,7 +81,7 @@ function pageBody(env, merchant, { summary, customers, promotions, config, notic
     ${notice ? `<div class="notice">${escapeHtml(notice)}</div>` : ""}
     ${error ? `<div class="error">${escapeHtml(error)}</div>` : ""}
 
-    <div class="kpi-grid" style="grid-template-columns:repeat(2,1fr);">
+    <div class="kpi-grid kpi-grid-2">
       <div class="kpi-card">
         <div class="kpi-top"><span class="kpi-label">Clientes inscritos</span></div>
         <div class="kpi-value">${summary ? summary.customer_count : "—"}</div>
@@ -131,10 +131,12 @@ function pageBody(env, merchant, { summary, customers, promotions, config, notic
 
     <div class="card" style="margin-bottom:16px;">
       <div class="card-head"><div><h3>Historial de promociones</h3><div class="sub">Últimas enviadas</div></div></div>
+      <div class="table-scroll">
       <table>
         <thead><tr><th>Fecha</th><th>Promoción</th><th>Estado</th></tr></thead>
         <tbody>${promoRows(promotions)}</tbody>
       </table>
+      </div>
     </div>
 
     ${
@@ -151,10 +153,12 @@ function pageBody(env, merchant, { summary, customers, promotions, config, notic
       <div class="card-head">
         <div><h3>Clientes</h3><div class="sub">Los más recientes</div></div>
       </div>
+      <div class="table-scroll">
       <table>
         <thead><tr><th>Cliente</th><th>Sellos</th><th>Código</th><th></th></tr></thead>
         <tbody>${rows || '<tr><td colspan="4" class="muted">Todavía no tienes clientes inscritos.</td></tr>'}</tbody>
       </table>
+      </div>
     </div>`;
 }
 

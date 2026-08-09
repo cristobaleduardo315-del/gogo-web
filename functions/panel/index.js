@@ -56,10 +56,12 @@ export async function onRequestGet({ request, env }) {
           <div><h3>Clientes recientes</h3><div class="sub">Programa de fidelización</div></div>
           <a class="btn ghost" href="/panel/fidelizacion">Ver todos</a>
         </div>
+        <div class="table-scroll">
         <table>
           <thead><tr><th>Cliente</th><th>Sellos</th></tr></thead>
           <tbody>${rows || '<tr><td colspan="2" class="muted">Todavía no tienes clientes inscritos.</td></tr>'}</tbody>
         </table>
+        </div>
       </div>
       <div class="card">
         <div class="card-head"><div><h3>Accesos rápidos</h3></div></div>
