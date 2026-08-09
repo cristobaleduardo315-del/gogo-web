@@ -167,6 +167,9 @@ export async function onRequestPost({ request, env }) {
   const logoUrl = (existingPage && existingPage.logo_url) || null;
   const instagramUrl = (existingPage && existingPage.instagram_url) || null;
   const tiktokUrl = (existingPage && existingPage.tiktok_url) || null;
+  const infoTitle = (existingPage && existingPage.info_title) || null;
+  const sloganLine = (existingPage && existingPage.slogan_line) || null;
+  const foundedYear = (existingPage && existingPage.founded_year) || null;
 
   await saveMenuPage(env.DB, merchant.id, {
     slug: rawSlug,
@@ -176,6 +179,9 @@ export async function onRequestPost({ request, env }) {
     logoUrl,
     instagramUrl,
     tiktokUrl,
+    infoTitle,
+    sloganLine,
+    foundedYear,
   });
   const qs = "notice=" + encodeURIComponent("Cambios guardados.");
   return new Response(null, { status: 302, headers: { Location: "/panel/menu?" + qs } });
