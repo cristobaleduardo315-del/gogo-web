@@ -136,3 +136,13 @@ export async function redeemLealtadCustomer(env, lealtadMerchantId, code) {
     body: { code },
   });
 }
+
+// Herramienta temporal de diagnóstico (ver wallet-debug.js en gogo-lealtad).
+// Se quita apenas se resuelva el problema puntual que se está investigando.
+export async function getWalletDebug(env, lealtadMerchantId, { code, resync = false } = {}) {
+  const params = new URLSearchParams();
+  if (code) params.set("code", code);
+  if (resync) params.set("resync", "1");
+  const qs = params.toString();
+  return call(env, `/internal/api/merchants/${lealtadMerchantId}/wallet-debug${qs ? `?${qs}` : ""}`);
+}
