@@ -1,5 +1,6 @@
 import { requireMerchant } from "../lib/auth.js";
 import { renderShell, escapeHtml } from "../lib/layout.js";
+import { qrSvg, qrSvgDataUrl } from "../lib/qr.js";
 import {
   getLealtadSummary,
   getLealtadCustomers,
@@ -71,6 +72,10 @@ function pageBody(env, merchant, { summary, customers, promotions, config, notic
   const logoSrc = cfg.logo_url ? `${lealtadBase}${cfg.logo_url}?v=${cacheBust}` : null;
   const stampIconSrc = cfg.stamp_icon_url ? `${lealtadBase}${cfg.stamp_icon_url}?v=${cacheBust}` : null;
   const joinUrl = summary ? `${lealtadBase}/c/${summary.slug}/unirse` : null;
+  // El QR codifica esta ruta separada (no joinUrl directo) para poder contar
+  // cuántas personas se inscribieron escaneando el QR físico -- ver
+  // /c/:slug/qr en gogo-lealtad y la gráfica de "Escaneos de QR" en Resumen.
+  const joinQrUrl = summary ? `${lealtadBase}/c/${summary.slug}/qr` : null;
 
   return `
     <div class="topbar">
@@ -142,7 +147,16 @@ function pageBody(env, merchant, { summary, customers, promotions, config, notic
     ${
       joinUrl
         ? `<div class="card" style="margin-bottom:16px;max-width:560px;">
-      <div class="card-head"><div><h3>Enlace de inscripción</h3><div class="sub">Compártelo para que tus clientes se unan al programa</div></div></div>
+      <div class="card-head"><div><h3>Inscripción a fidelización</h3><div class="sub">Que tus clientes se unan escaneando el QR, sin escribir el enlace</div></div></div>
+      <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px;">
+        <div style="background:#fff;padding:10px;border-radius:12px;border:1px solid var(--border);flex-shrink:0;line-height:0;">
+          ${qrSvg(joinQrUrl)}
+        </div>
+        <div style="flex:1;min-width:160px;">
+          <a class="btn ghost" href="${qrSvgDataUrl(joinQrUrl)}" download="qr-fidelizacion-${escapeHtml(summary.slug)}.svg" style="display:block;text-align:center;">Descargar QR</a>
+        </div>
+      </div>
+      <label class="muted" style="display:block;font-size:12px;font-weight:700;margin-bottom:6px;">O comparte el enlace directo</label>
       <input readonly value="${escapeHtml(joinUrl)}" onclick="this.select()" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:13px;">
       <a class="btn ghost" href="${escapeHtml(joinUrl)}" target="_blank" rel="noopener" style="display:block;text-align:center;margin-top:10px;">Abrir formulario de inscripción</a>
     </div>`

@@ -1,6 +1,10 @@
 import { requireMerchant } from "../lib/auth.js";
 import { renderShell, escapeHtml } from "../lib/layout.js";
-import { getLealtadSummary, getLealtadCustomers } from "../lib/internalApi.js";
+import { getLealtadSummary, getLealtadCustomers, getLealtadQrScans } from "../lib/internalApi.js";
+import { listQrScansByDay } from "../lib/menuData.js";
+import { buildDailySeries, qrScansChartSvg, qrScansTotals, QR_CHART_COLORS } from "../lib/qrStatsChart.js";
+
+const QR_STATS_DAYS = 14;
 
 export async function onRequestGet({ request, env }) {
   const merchant = await requireMerchant(request, env);
@@ -16,6 +20,27 @@ export async function onRequestGet({ request, env }) {
     if (summaryRes.ok) summary = summaryRes.data;
     if (customersRes.ok) customers = (customersRes.data.customers || []).slice(0, 6);
   }
+
+  // Estadística de escaneos de QR (menú + inscripción a fidelización), por
+  // día, para el control estadístico que pidió el negocio. Cada servicio
+  // guarda su propio historial (ver migrations/0008 acá y 0005 en
+  // gogo-lealtad); se combinan recién acá para la gráfica. Si alguna de las
+  // dos falla (p. ej. falta correr una migración, o gogo-lealtad no
+  // responde) no debe tumbar el resto del Resumen -- se ve esa serie en 0.
+  const since = Date.now() - QR_STATS_DAYS * 24 * 60 * 60 * 1000;
+  let menuScans = [];
+  try {
+    menuScans = await listQrScansByDay(env.DB, merchant.id, since);
+  } catch (err) {
+    console.error("listQrScansByDay (menu):", err.message || err);
+  }
+  let lealtadScans = [];
+  if (merchant.lealtad_merchant_id) {
+    const qrRes = await getLealtadQrScans(env, merchant.lealtad_merchant_id, QR_STATS_DAYS);
+    if (qrRes.ok) lealtadScans = qrRes.data.scans || [];
+  }
+  const qrSeries = buildDailySeries(menuScans, lealtadScans, QR_STATS_DAYS);
+  const qrTotals = qrScansTotals(qrSeries);
 
   const rows = customers
     .map(
@@ -69,6 +94,27 @@ export async function onRequestGet({ request, env }) {
         <a class="btn ghost" style="display:block;text-align:center;margin-bottom:10px;" href="/panel/mi-pagina">Editar mi página</a>
         <a class="btn ghost" style="display:block;text-align:center;" href="/panel/configuracion">Configuración</a>
       </div>
+    </div>
+
+    <div class="card" data-wide>
+      <div class="card-head">
+        <div><h3>Escaneos de QR</h3><div class="sub">Últimos ${QR_STATS_DAYS} días — menú y programa de fidelización</div></div>
+      </div>
+      <div style="display:flex;gap:22px;flex-wrap:wrap;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="width:11px;height:11px;border-radius:3px;background:${QR_CHART_COLORS.menu};display:inline-block;flex-shrink:0;"></span>
+          <span class="muted" style="font-size:13px;">Menú — <strong style="color:var(--text);">${qrTotals.menu}</strong></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="width:11px;height:11px;border-radius:3px;background:${QR_CHART_COLORS.fidelizacion};display:inline-block;flex-shrink:0;"></span>
+          <span class="muted" style="font-size:13px;">Fidelización — <strong style="color:var(--text);">${qrTotals.fidelizacion}</strong></span>
+        </div>
+      </div>
+      ${
+        qrTotals.menu + qrTotals.fidelizacion > 0
+          ? qrScansChartSvg(qrSeries)
+          : `<p class="muted" style="font-size:13px;">Todavía no hay escaneos registrados en este rango. Comparte el QR de tu menú o el de inscripción a fidelización para empezar a ver datos acá.</p>`
+      }
     </div>`;
 
   return new Response(renderShell({ title: "Resumen", active: "resumen", merchant, bodyHtml: body }), {
