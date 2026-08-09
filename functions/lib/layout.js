@@ -16,6 +16,7 @@ export function escapeHtml(str) {
 const NAV_ITEMS = [
   { key: "resumen", href: "/panel", label: "Resumen", group: "Tu panel" },
   { key: "mi-pagina", href: "/panel/mi-pagina", label: "Mi página", group: "Tu panel" },
+  { key: "menu", href: "/panel/menu", label: "Menú", group: "Tu panel" },
   { key: "fidelizacion", href: "/panel/fidelizacion", label: "Fidelización", group: "Tu panel" },
   { key: "mi-plan", href: "/panel/mi-plan", label: "Mi plan", group: "Tu panel" },
   { key: "configuracion", href: "/panel/configuracion", label: "Configuración", group: "Cuenta" },
@@ -24,6 +25,7 @@ const NAV_ITEMS = [
 const NAV_ICONS = {
   resumen: `<line x1="6" y1="20" x2="6" y2="12"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="18" y1="20" x2="18" y2="15"/>`,
   "mi-pagina": `<rect x="3" y="4" width="18" height="12" rx="1.5"/><line x1="8" y1="20" x2="16" y2="20"/><line x1="12" y1="16" x2="12" y2="20"/>`,
+  menu: `<path d="M6 3v7a2 2 0 0 0 2 2h0a2 2 0 0 0 2-2V3"/><path d="M8 12v9"/><path d="M17 3c-1.5 0-3 1.5-3 4v3h3m0-7v18"/>`,
   fidelizacion: `<rect x="4" y="9" width="16" height="11" rx="1"/><line x1="4" y1="13" x2="20" y2="13"/><line x1="12" y1="9" x2="12" y2="20"/><path d="M12 9c-1.5 0-3-1-3-2.5S10 4 11 5s1 3 1 4"/><path d="M12 9c1.5 0 3-1 3-2.5S13 4 12 5s-1 3-1 4"/>`,
   "mi-plan": `<rect x="3" y="6" width="18" height="13" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/>`,
   configuracion: `<line x1="4" y1="7" x2="20" y2="7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="7" r="2.1" fill="currentColor"/><line x1="4" y1="14" x2="20" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="14" r="2.1" fill="currentColor"/><line x1="4" y1="19" x2="20" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="19" r="2.1" fill="currentColor"/>`,
