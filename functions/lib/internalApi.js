@@ -136,3 +136,11 @@ export async function redeemLealtadCustomer(env, lealtadMerchantId, code) {
     body: { code },
   });
 }
+
+// Elimina por completo a un cliente (historial de sellos incluido) y expira
+// su pase en Google Wallet si lo tenía guardado. Irreversible.
+export async function deleteLealtadCustomer(env, lealtadMerchantId, code) {
+  return call(env, `/internal/api/merchants/${lealtadMerchantId}/customers/${encodeURIComponent(code)}`, {
+    method: "DELETE",
+  });
+}

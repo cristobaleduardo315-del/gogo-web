@@ -50,13 +50,22 @@ const SHELL_STYLES = `
     --shadow:0 1px 2px rgba(11,11,11,0.04), 0 1px 12px rgba(11,11,11,0.03);
   }
   *{box-sizing:border-box;margin:0;padding:0;}
+  html{overflow-x:hidden;}
   body{
     font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background:var(--bg);
     color:var(--text);
     display:flex;
     min-height:100vh;
+    overflow-x:hidden;
   }
+  /* Checkbox oculto que controla el menú lateral en celular (sin JS): el
+     ":checked" de este input activa las reglas de abajo que corren el
+     sidebar a la vista y muestran el fondo oscuro para cerrarlo tocando
+     afuera. */
+  .nav-toggle{position:absolute;left:-9999px;top:auto;}
+  .mobile-topbar{display:none;}
+  .nav-scrim{display:none;}
   .sidebar{
     width:240px;flex-shrink:0;background:var(--panel);border-right:1px solid var(--border);
     padding:28px 20px;display:flex;flex-direction:column;gap:32px;
@@ -81,20 +90,21 @@ const SHELL_STYLES = `
   .logout-btn{display:block;width:100%;text-align:left;background:none;border:none;color:var(--text-dim);font-size:12.5px;font-weight:600;cursor:pointer;padding:8px 0 0;}
   .logout-btn:hover{color:var(--text);}
 
-  .main{flex:1;padding:32px 40px;max-width:1400px;}
+  .main{flex:1;padding:32px 40px;max-width:1400px;min-width:0;}
   .topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;flex-wrap:wrap;gap:16px;}
   .topbar h1{font-size:26px;font-weight:800;letter-spacing:-0.3px;}
   .topbar p{color:var(--text-dim);font-size:14px;margin-top:4px;}
 
   .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
-  .kpi-card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--shadow);}
+  .kpi-grid-2{grid-template-columns:repeat(2,1fr);}
+  .kpi-card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--shadow);min-width:0;}
   .kpi-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
   .kpi-label{font-size:13px;color:var(--text-dim);font-weight:600;}
   .kpi-value{font-size:30px;font-weight:800;letter-spacing:-0.5px;}
   .kpi-delta{font-size:12.5px;font-weight:700;margin-top:6px;display:flex;align-items:center;gap:4px;}
 
   .row-2{display:grid;grid-template-columns:1.6fr 1fr;gap:16px;margin-bottom:16px;}
-  .card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:var(--shadow);}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:var(--shadow);min-width:0;}
   .card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
   .card-head h3{font-size:15px;font-weight:700;}
   .card-head .sub{font-size:12.5px;color:var(--text-dim);margin-top:2px;}
@@ -103,6 +113,12 @@ const SHELL_STYLES = `
   th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-dim);padding:0 12px 12px;font-weight:700;}
   td{padding:13px 12px;font-size:13.5px;border-top:1px solid var(--border);}
   tr:hover td{background:var(--panel-2);}
+  /* En vez de achicar las columnas hasta hacerlas ilegibles en celular, la
+     tabla mantiene un ancho mínimo y el contenedor scrollea horizontal —
+     así ninguna tabla se sale del margen de la página ni empuja el resto
+     del layout. */
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -6px;padding:0 6px;}
+  .table-scroll table{min-width:480px;}
   .cust-cell{display:flex;align-items:center;gap:10px;}
   .cust-avatar{width:28px;height:28px;border-radius:50%;background:var(--gray-chip);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--lime-text);flex-shrink:0;}
   .muted{color:var(--text-dim);}
@@ -132,8 +148,46 @@ const SHELL_STYLES = `
   @media (max-width:1100px){
     .kpi-grid{grid-template-columns:repeat(2,1fr);}
     .row-2{grid-template-columns:1fr;}
-    .sidebar{display:none;}
     .main{padding:24px;}
+  }
+
+  /* Debajo de este ancho el sidebar fijo ya no cabe junto al contenido, así
+     que pasa a ser un cajón (drawer) que se desliza encima de todo — antes
+     simplemente desaparecía (display:none) y el negocio se quedaba sin forma
+     de navegar entre secciones desde el celular. Se controla con el checkbox
+     .nav-toggle (sin JS): al marcarlo, el sidebar entra desde la izquierda y
+     aparece un fondo oscuro (.nav-scrim) que lo cierra al tocarlo. */
+  @media (max-width:880px){
+    body{display:block;}
+    .mobile-topbar{
+      display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:30;
+      background:var(--panel);border-bottom:1px solid var(--border);padding:14px 20px;
+    }
+    .mobile-topbar img{height:34px;width:34px;object-fit:contain;}
+    .hamburger-btn{
+      display:flex;flex-direction:column;justify-content:center;gap:4px;
+      width:34px;height:34px;border-radius:8px;cursor:pointer;flex-shrink:0;
+    }
+    .hamburger-btn span{display:block;height:2px;width:18px;background:var(--text);border-radius:2px;}
+    .sidebar{
+      position:fixed;top:0;left:0;height:100vh;z-index:50;width:260px;max-width:82vw;
+      transform:translateX(-100%);transition:transform .22s ease;box-shadow:0 0 0 1px var(--border);
+      overflow-y:auto;
+    }
+    .nav-toggle:checked ~ .sidebar{transform:translateX(0);}
+    .nav-toggle:checked ~ .nav-scrim{
+      display:block;position:fixed;inset:0;background:rgba(11,11,11,0.45);z-index:40;
+    }
+    .main{max-width:100%;}
+  }
+
+  @media (max-width:640px){
+    .main{padding:16px;}
+    .topbar{margin-bottom:20px;}
+    .topbar h1{font-size:21px;}
+    .kpi-grid, .kpi-grid-2{grid-template-columns:1fr;gap:12px;}
+    .card{padding:16px;border-radius:14px;}
+    .card-head{flex-wrap:wrap;gap:8px;}
   }
 `;
 
@@ -198,6 +252,12 @@ export function renderShell({ title, active, merchant, bodyHtml }) {
 <style>${SHELL_STYLES}</style>
 </head>
 <body>
+  <input type="checkbox" id="nav-toggle" class="nav-toggle">
+  <div class="mobile-topbar">
+    <label for="nav-toggle" class="hamburger-btn" aria-label="Abrir menú"><span></span><span></span><span></span></label>
+    <img src="/assets/logo.webp" alt="gogo">
+  </div>
+  <label for="nav-toggle" class="nav-scrim" aria-hidden="true"></label>
   <aside class="sidebar">
     <img src="/assets/logo.webp" alt="gogo" class="sidebar-logo">
     <div class="biz-banner">
