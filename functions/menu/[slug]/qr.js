@@ -13,8 +13,9 @@
 // basta con mandarlo ahí.
 import { getMenuPageBySlug, incrementQrScan, logQrScan } from "../../lib/menuData.js";
 
-export async function onRequestGet({ params, env }) {
+export async function onRequestGet({ params, env, request }) {
   const slug = String(params.slug || "").toLowerCase();
+  const isDebug = new URL(request.url).searchParams.get("debug") === "1";
   const page = await getMenuPageBySlug(env.DB, slug);
   if (!page) {
     return new Response(null, { status: 302, headers: { Location: "/menu/" + encodeURIComponent(slug) } });
@@ -29,11 +30,13 @@ export async function onRequestGet({ params, env }) {
     console.error("logQrScan (menu):", err.message || err);
     debugInsertError = err.message || String(err);
   }
+  // TODO(temporal): quitar este bloque `isDebug` una vez confirmado que el
+  // log de escaneos inserta bien -- solo para diagnosticar el contador en 0.
+  if (isDebug) {
+    return new Response(JSON.stringify({ merchantId: page.merchant_id, insertError: debugInsertError || "ok" }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  }
   const destination = page.custom_domain ? `https://${page.custom_domain}/` : "/menu/" + encodeURIComponent(slug);
-  // TODO(temporal): quitar X-Debug-Insert una vez confirmado que el log de
-  // escaneos inserta bien -- solo para diagnosticar el contador en 0.
-  return new Response(null, {
-    status: 302,
-    headers: { Location: destination, "X-Debug-Insert": debugInsertError || "ok", "X-Debug-Merchant-Id": String(page.merchant_id) },
-  });
+  return new Response(null, { status: 302, headers: { Location: destination } });
 }
