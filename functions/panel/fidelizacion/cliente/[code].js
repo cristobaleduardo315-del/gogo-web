@@ -1,6 +1,11 @@
 import { requireMerchant } from "../../../lib/auth.js";
 import { renderShell, escapeHtml } from "../../../lib/layout.js";
-import { getLealtadCustomer, stampLealtadCustomer, redeemLealtadCustomer } from "../../../lib/internalApi.js";
+import {
+  getLealtadCustomer,
+  stampLealtadCustomer,
+  redeemLealtadCustomer,
+  deleteLealtadCustomer,
+} from "../../../lib/internalApi.js";
 
 function html(body, status = 200) {
   return new Response(body, { status, headers: { "Content-Type": "text/html; charset=utf-8" } });
@@ -17,7 +22,7 @@ function pageBody(customer, cardUrl, { notice, error } = {}) {
     ${notice ? `<div class="notice">${escapeHtml(notice)}</div>` : ""}
     ${error ? `<div class="error">${escapeHtml(error)}</div>` : ""}
 
-    <div class="kpi-grid" style="grid-template-columns:repeat(2,1fr);">
+    <div class="kpi-grid kpi-grid-2">
       <div class="kpi-card">
         <div class="kpi-top"><span class="kpi-label">Sellos actuales</span></div>
         <div class="kpi-value">${customer.stampCount}</div>
@@ -57,6 +62,14 @@ function pageBody(customer, cardUrl, { notice, error } = {}) {
     <div class="card" style="max-width:480px;">
       <div class="card-head"><div><h3>Tarjeta del cliente</h3><div class="sub">Código: ${escapeHtml(customer.code)}</div></div></div>
       <a class="btn ghost" href="${escapeHtml(cardUrl)}" target="_blank" rel="noopener" style="display:block;text-align:center;">Ver tarjeta pública</a>
+    </div>
+
+    <div class="card" style="max-width:480px;margin-top:16px;border-color:#e6a5a0;">
+      <div class="card-head"><div><h3>Eliminar cliente</h3><div class="sub">Borra su historial de sellos y desactiva su pase de Wallet. No se puede deshacer.</div></div></div>
+      <form method="POST" onsubmit="return confirm('¿Eliminar a ${escapeHtml(customer.customerName).replace(/'/g, "\\'")}? Esta acción no se puede deshacer.');">
+        <input type="hidden" name="action" value="eliminar">
+        <button class="btn ghost" type="submit" style="width:100%;color:#c0392b;border-color:#c0392b;">Eliminar cliente</button>
+      </form>
     </div>`;
 }
 
@@ -128,6 +141,15 @@ export async function onRequestPost({ request, env, params }) {
       return backTo("error=" + encodeURIComponent(result.data?.error || "No se pudo canjear."));
     }
     return backTo("notice=" + encodeURIComponent("Recompensa canjeada."));
+  }
+
+  if (action === "eliminar") {
+    const result = await deleteLealtadCustomer(env, merchant.lealtad_merchant_id, code);
+    if (!result.ok) {
+      return backTo("error=" + encodeURIComponent(result.data?.error || "No se pudo eliminar."));
+    }
+    const qs = "notice=" + encodeURIComponent("Cliente eliminado.");
+    return new Response(null, { status: 302, headers: { Location: `/panel/fidelizacion?${qs}` } });
   }
 
   return backTo();
