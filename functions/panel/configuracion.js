@@ -1,15 +1,13 @@
 import { requireMerchant, hashPassword, verifyPassword } from "../lib/auth.js";
 import { renderShell, escapeHtml } from "../lib/layout.js";
-import { getLealtadConfig, updateLealtadConfig } from "../lib/internalApi.js";
 
 function html(body, status = 200) {
   return new Response(body, { status, headers: { "Content-Type": "text/html; charset=utf-8" } });
 }
 
-function pageBody(merchant, lealtadConfig, { notice, error } = {}) {
-  const lc = lealtadConfig || {};
+function pageBody(merchant, { notice, error } = {}) {
   return `
-    <div class="topbar"><div><h1>Configuración</h1><p>Datos de tu cuenta y de tu programa de fidelización.</p></div></div>
+    <div class="topbar"><div><h1>Configuración</h1><p>Datos de tu cuenta.</p></div></div>
     ${notice ? `<div class="notice">${escapeHtml(notice)}</div>` : ""}
     ${error ? `<div class="error">${escapeHtml(error)}</div>` : ""}
 
@@ -29,20 +27,7 @@ function pageBody(merchant, lealtadConfig, { notice, error } = {}) {
 
     ${
       merchant.lealtad_merchant_id
-        ? `<div class="card" style="max-width:560px;">
-      <div class="card-head"><div><h3>Programa de fidelización</h3><div class="sub">Sellos y recompensa</div></div></div>
-      <form class="inline" method="POST" action="/panel/configuracion">
-        <input type="hidden" name="action" value="lealtad">
-        <label>Sellos necesarios para la recompensa</label>
-        <input name="stamps_required" type="number" min="1" max="50" required value="${lc.stamps_required || 10}">
-        <label>Descripción de la recompensa</label>
-        <input name="reward_text" required value="${escapeHtml(lc.reward_text || "")}">
-        <label>Color de marca</label>
-        <input name="brand_color" type="color" value="${escapeHtml(lc.brand_color || "#ccff00")}" style="height:44px;padding:4px;">
-        <button class="btn" type="submit" style="margin-top:18px;">Guardar fidelización</button>
-      </form>
-      <p class="muted" style="margin-top:14px;font-size:12.5px;">Para subir logo o ícono de sello, <a href="/panel/fidelizacion/ir">abre el panel completo de fidelización</a>.</p>
-    </div>`
+        ? `<p class="muted" style="max-width:560px;font-size:12.5px;">Los sellos, la recompensa, el color y el logo de tu tarjeta de fidelización se editan en <a href="/panel/fidelizacion">Fidelización</a>.</p>`
         : ""
     }`;
 }
@@ -50,12 +35,7 @@ function pageBody(merchant, lealtadConfig, { notice, error } = {}) {
 export async function onRequestGet({ request, env }) {
   const merchant = await requireMerchant(request, env);
   if (!merchant) return new Response(null, { status: 302, headers: { Location: "/login" } });
-  let lealtadConfig = null;
-  if (merchant.lealtad_merchant_id) {
-    const res = await getLealtadConfig(env, merchant.lealtad_merchant_id);
-    if (res.ok) lealtadConfig = res.data;
-  }
-  return html(renderShell({ title: "Configuración", active: "configuracion", merchant, bodyHtml: pageBody(merchant, lealtadConfig) }));
+  return html(renderShell({ title: "Configuración", active: "configuracion", merchant, bodyHtml: pageBody(merchant) }));
 }
 
 export async function onRequestPost({ request, env }) {
@@ -67,13 +47,12 @@ export async function onRequestPost({ request, env }) {
   if (action === "account") {
     const currentPassword = String(formData.get("current_password") || "");
     if (!(await verifyPassword(currentPassword, merchant.password_hash, merchant.password_salt))) {
-      const lealtadConfig = merchant.lealtad_merchant_id ? (await getLealtadConfig(env, merchant.lealtad_merchant_id)).data : null;
       return html(
         renderShell({
           title: "Configuración",
           active: "configuracion",
           merchant,
-          bodyHtml: pageBody(merchant, lealtadConfig, { error: "Contraseña actual incorrecta." }),
+          bodyHtml: pageBody(merchant, { error: "Contraseña actual incorrecta." }),
         }),
         400
       );
@@ -81,13 +60,12 @@ export async function onRequestPost({ request, env }) {
     const businessName = String(formData.get("business_name") || "").trim();
     const newPassword = String(formData.get("new_password") || "");
     if (newPassword && newPassword.length < 8) {
-      const lealtadConfig = merchant.lealtad_merchant_id ? (await getLealtadConfig(env, merchant.lealtad_merchant_id)).data : null;
       return html(
         renderShell({
           title: "Configuración",
           active: "configuracion",
           merchant,
-          bodyHtml: pageBody(merchant, lealtadConfig, { error: "La nueva contraseña debe tener al menos 8 caracteres." }),
+          bodyHtml: pageBody(merchant, { error: "La nueva contraseña debe tener al menos 8 caracteres." }),
         }),
         400
       );
@@ -101,34 +79,12 @@ export async function onRequestPost({ request, env }) {
       await env.DB.prepare("UPDATE web_merchants SET business_name = ? WHERE id = ?").bind(businessName, merchant.id).run();
     }
     merchant.business_name = businessName;
-    const lealtadConfig = merchant.lealtad_merchant_id ? (await getLealtadConfig(env, merchant.lealtad_merchant_id)).data : null;
     return html(
       renderShell({
         title: "Configuración",
         active: "configuracion",
         merchant,
-        bodyHtml: pageBody(merchant, lealtadConfig, { notice: "Cambios guardados." }),
-      })
-    );
-  }
-
-  if (action === "lealtad" && merchant.lealtad_merchant_id) {
-    const stampsRequired = parseInt(formData.get("stamps_required"), 10);
-    const rewardText = String(formData.get("reward_text") || "").trim();
-    const brandColor = String(formData.get("brand_color") || "#ccff00");
-    await updateLealtadConfig(env, merchant.lealtad_merchant_id, {
-      business_name: merchant.business_name,
-      stamps_required: stampsRequired,
-      reward_text: rewardText,
-      brand_color: brandColor,
-    });
-    const lealtadConfig = { stamps_required: stampsRequired, reward_text: rewardText, brand_color: brandColor };
-    return html(
-      renderShell({
-        title: "Configuración",
-        active: "configuracion",
-        merchant,
-        bodyHtml: pageBody(merchant, lealtadConfig, { notice: "Cambios guardados." }),
+        bodyHtml: pageBody(merchant, { notice: "Cambios guardados." }),
       })
     );
   }

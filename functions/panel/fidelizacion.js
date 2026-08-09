@@ -4,11 +4,28 @@ import {
   getLealtadSummary,
   getLealtadCustomers,
   getLealtadPromotions,
+  getLealtadConfig,
+  updateLealtadConfig,
   sendLealtadPromotion,
 } from "../lib/internalApi.js";
 
 function html(body, status = 200) {
   return new Response(body, { status, headers: { "Content-Type": "text/html; charset=utf-8" } });
+}
+
+// Igual límite que gogo-lealtad (src/index.js) para el logo y el ícono de
+// sello que se suben desde acá.
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024; // 2MB
+
+async function fileToBase64(file) {
+  const buf = await file.arrayBuffer();
+  const bytes = new Uint8Array(buf);
+  let binary = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+  }
+  return btoa(binary);
 }
 
 function formatDate(ts) {
@@ -31,7 +48,7 @@ function promoRows(promotions) {
     .join("");
 }
 
-function pageBody(merchant, { summary, customers, promotions, notice, error }) {
+function pageBody(env, merchant, { summary, customers, promotions, config, notice, error }) {
   const rows = customers
     .map(
       (c) => `<tr>
@@ -41,6 +58,11 @@ function pageBody(merchant, { summary, customers, promotions, notice, error }) {
       </tr>`
     )
     .join("");
+
+  const lealtadBase = (env.GOGO_LEALTAD_URL || "").replace(/\/$/, "");
+  const cfg = config || {};
+  const logoSrc = cfg.logo_url ? `${lealtadBase}${cfg.logo_url}` : null;
+  const stampIconSrc = cfg.stamp_icon_url ? `${lealtadBase}${cfg.stamp_icon_url}` : null;
 
   return `
     <div class="topbar">
@@ -62,11 +84,35 @@ function pageBody(merchant, { summary, customers, promotions, notice, error }) {
       </div>
     </div>
 
+    <div class="card" style="margin-bottom:16px;max-width:560px;">
+      <div class="card-head">
+        <div><h3>Personalizar tarjeta</h3><div class="sub">Así se ve la tarjeta de sellos que guardan tus clientes en Google Wallet.</div></div>
+      </div>
+      <form class="inline" method="POST" action="/panel/fidelizacion" enctype="multipart/form-data">
+        <input type="hidden" name="action" value="personalizar">
+        <label>Sellos necesarios para la recompensa</label>
+        <input name="stamps_required" type="number" min="1" max="50" required value="${cfg.stamps_required || (summary ? summary.stamps_required : 10)}">
+        <label>Descripción de la recompensa</label>
+        <input name="reward_text" required value="${escapeHtml(cfg.reward_text || (summary ? summary.reward_text : ""))}">
+        <label>Color de marca</label>
+        <input name="brand_color" type="color" value="${escapeHtml(cfg.brand_color || (summary ? summary.brand_color : "#ccff00"))}" style="height:44px;padding:4px;">
+        <label>Logo del negocio</label>
+        ${logoSrc ? `<img src="${escapeHtml(logoSrc)}" alt="Logo actual" style="width:56px;height:56px;object-fit:contain;border-radius:10px;border:1px solid var(--border);margin-bottom:8px;background:#fff;">` : ""}
+        <input name="logo_file" type="file" accept="image/*">
+        <label>Ícono del sello</label>
+        ${stampIconSrc ? `<img src="${escapeHtml(stampIconSrc)}" alt="Ícono actual" style="width:56px;height:56px;object-fit:contain;border-radius:10px;border:1px solid var(--border);margin-bottom:8px;background:#fff;">` : ""}
+        <input name="stamp_icon_file" type="file" accept="image/*">
+        <p class="muted" style="margin-top:10px;font-size:12px;">Imágenes hasta 2MB. Si no subes una nueva, se conserva la actual.</p>
+        <button class="btn" type="submit" style="margin-top:18px;">Guardar tarjeta</button>
+      </form>
+    </div>
+
     <div class="card" style="margin-bottom:16px;">
       <div class="card-head">
         <div><h3>Enviar promoción</h3><div class="sub">Llega como notificación push a quien tenga la tarjeta guardada en Google Wallet${summary ? ` (de tus ${summary.customer_count} clientes inscritos)` : ""}.</div></div>
       </div>
       <form class="inline" method="POST" action="/panel/fidelizacion">
+        <input type="hidden" name="action" value="promo">
         <label>Título</label>
         <input name="header" required maxlength="30" placeholder="Ej. 2x1 hoy">
         <label>Mensaje</label>
@@ -96,15 +142,17 @@ function pageBody(merchant, { summary, customers, promotions, notice, error }) {
 }
 
 async function loadData(env, merchant) {
-  const [summaryRes, customersRes, promosRes] = await Promise.all([
+  const [summaryRes, customersRes, promosRes, configRes] = await Promise.all([
     getLealtadSummary(env, merchant.lealtad_merchant_id),
     getLealtadCustomers(env, merchant.lealtad_merchant_id),
     getLealtadPromotions(env, merchant.lealtad_merchant_id),
+    getLealtadConfig(env, merchant.lealtad_merchant_id),
   ]);
   return {
     summary: summaryRes.ok ? summaryRes.data : null,
     customers: customersRes.ok ? customersRes.data.customers || [] : [],
     promotions: promosRes.ok ? promosRes.data.promotions || [] : [],
+    config: configRes.ok ? configRes.data : null,
   };
 }
 
@@ -132,7 +180,7 @@ export async function onRequestGet({ request, env }) {
       title: "Fidelización",
       active: "fidelizacion",
       merchant,
-      bodyHtml: pageBody(merchant, { ...data, notice, error }),
+      bodyHtml: pageBody(env, merchant, { ...data, notice, error }),
     })
   );
 }
@@ -164,6 +212,12 @@ async function handlePost({ request, env }) {
   }
 
   const formData = await request.formData();
+  const action = String(formData.get("action") || "promo");
+
+  if (action === "personalizar") {
+    return handlePersonalizar({ formData, env, merchant });
+  }
+
   const header = String(formData.get("header") || "").trim();
   const body = String(formData.get("body") || "").trim();
 
@@ -176,5 +230,67 @@ async function handlePost({ request, env }) {
   const qs = result.ok
     ? "notice=" + encodeURIComponent("Promoción enviada.")
     : "error=" + encodeURIComponent(result.data?.error || "No se pudo enviar la notificación.");
+  return new Response(null, { status: 302, headers: { Location: "/panel/fidelizacion?" + qs } });
+}
+
+// Guarda sellos/recompensa/color/logo/ícono de la tarjeta de fidelización.
+// Las imágenes son opcionales: si el negocio no sube un archivo nuevo, se
+// conserva el que ya tenía (gogo-lealtad hace el COALESCE del lado de la
+// base de datos, acá solo evitamos mandar algo si no hay archivo).
+async function handlePersonalizar({ formData, env, merchant }) {
+  const stampsRequired = parseInt(formData.get("stamps_required"), 10);
+  const rewardText = String(formData.get("reward_text") || "").trim();
+  const brandColor = String(formData.get("brand_color") || "#ccff00");
+
+  if (!rewardText || !stampsRequired || stampsRequired < 1) {
+    const qs = "error=" + encodeURIComponent("Revisa los campos, hay algo inválido.");
+    return new Response(null, { status: 302, headers: { Location: "/panel/fidelizacion?" + qs } });
+  }
+
+  let logoImage = null;
+  let logoMime = null;
+  const logoFile = formData.get("logo_file");
+  if (logoFile && typeof logoFile === "object" && logoFile.size > 0) {
+    if (!logoFile.type || !logoFile.type.startsWith("image/")) {
+      const qs = "error=" + encodeURIComponent("El logo debe ser una imagen.");
+      return new Response(null, { status: 302, headers: { Location: "/panel/fidelizacion?" + qs } });
+    }
+    if (logoFile.size > MAX_IMAGE_BYTES) {
+      const qs = "error=" + encodeURIComponent("El logo es muy pesado (máx. 2MB).");
+      return new Response(null, { status: 302, headers: { Location: "/panel/fidelizacion?" + qs } });
+    }
+    logoImage = await fileToBase64(logoFile);
+    logoMime = logoFile.type;
+  }
+
+  let stampIconImage = null;
+  let stampIconMime = null;
+  const stampFile = formData.get("stamp_icon_file");
+  if (stampFile && typeof stampFile === "object" && stampFile.size > 0) {
+    if (!stampFile.type || !stampFile.type.startsWith("image/")) {
+      const qs = "error=" + encodeURIComponent("El ícono de sello debe ser una imagen.");
+      return new Response(null, { status: 302, headers: { Location: "/panel/fidelizacion?" + qs } });
+    }
+    if (stampFile.size > MAX_IMAGE_BYTES) {
+      const qs = "error=" + encodeURIComponent("El ícono de sello es muy pesado (máx. 2MB).");
+      return new Response(null, { status: 302, headers: { Location: "/panel/fidelizacion?" + qs } });
+    }
+    stampIconImage = await fileToBase64(stampFile);
+    stampIconMime = stampFile.type;
+  }
+
+  const result = await updateLealtadConfig(env, merchant.lealtad_merchant_id, {
+    business_name: merchant.business_name,
+    stamps_required: stampsRequired,
+    reward_text: rewardText,
+    brand_color: brandColor,
+    logo_image: logoImage,
+    logo_mime: logoMime,
+    stamp_icon_image: stampIconImage,
+    stamp_icon_mime: stampIconMime,
+  });
+  const qs = result.ok
+    ? "notice=" + encodeURIComponent("Tarjeta actualizada.")
+    : "error=" + encodeURIComponent(result.data?.error || "No se pudo guardar la tarjeta.");
   return new Response(null, { status: 302, headers: { Location: "/panel/fidelizacion?" + qs } });
 }
