@@ -13,9 +13,8 @@
 // basta con mandarlo ahí.
 import { getMenuPageBySlug, incrementQrScan, logQrScan } from "../../lib/menuData.js";
 
-export async function onRequestGet({ params, env, request }) {
+export async function onRequestGet({ params, env }) {
   const slug = String(params.slug || "").toLowerCase();
-  const isDebug = new URL(request.url).searchParams.get("debug") === "1";
   const page = await getMenuPageBySlug(env.DB, slug);
   if (!page) {
     return new Response(null, { status: 302, headers: { Location: "/menu/" + encodeURIComponent(slug) } });
@@ -23,19 +22,10 @@ export async function onRequestGet({ params, env, request }) {
   await incrementQrScan(env.DB, slug);
   // El log con fecha (para la gráfica del dashboard) no debe tumbar el
   // redirect si la migración 0008 todavía no corrió en producción.
-  let debugInsertError = null;
   try {
     await logQrScan(env.DB, page.merchant_id, Date.now());
   } catch (err) {
     console.error("logQrScan (menu):", err.message || err);
-    debugInsertError = err.message || String(err);
-  }
-  // TODO(temporal): quitar este bloque `isDebug` una vez confirmado que el
-  // log de escaneos inserta bien -- solo para diagnosticar el contador en 0.
-  if (isDebug) {
-    return new Response(JSON.stringify({ merchantId: page.merchant_id, insertError: debugInsertError || "ok" }), {
-      headers: { "Content-Type": "application/json" },
-    });
   }
   const destination = page.custom_domain ? `https://${page.custom_domain}/` : "/menu/" + encodeURIComponent(slug);
   return new Response(null, { status: 302, headers: { Location: destination } });
