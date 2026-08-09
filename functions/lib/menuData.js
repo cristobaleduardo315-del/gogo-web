@@ -26,6 +26,13 @@ export async function getMenuPageBySlug(db, slug) {
   return db.prepare("SELECT * FROM menu_pages WHERE slug = ?").bind(slug).first();
 }
 
+// Suma 1 al contador de escaneos del QR del menú (ver migrations/0007).
+// No valida que el slug exista: si no existe, el UPDATE simplemente no
+// afecta filas — la ruta que llama a esto ya resuelve el 404 aparte.
+export async function incrementQrScan(db, slug) {
+  await db.prepare("UPDATE menu_pages SET qr_scan_count = qr_scan_count + 1 WHERE slug = ?").bind(slug).run();
+}
+
 export async function isSlugTaken(db, slug, excludingMerchantId) {
   const row = await db
     .prepare("SELECT merchant_id FROM menu_pages WHERE slug = ? AND merchant_id != ?")
