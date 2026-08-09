@@ -52,9 +52,10 @@ function pageBody(env, merchant, { summary, customers, promotions, config, notic
   const rows = customers
     .map(
       (c) => `<tr>
-        <td><div class="cust-cell"><div class="cust-avatar">${escapeHtml((c.name || "?").slice(0, 2).toUpperCase())}</div>${escapeHtml(c.name)}</div></td>
+        <td><a href="/panel/fidelizacion/cliente/${encodeURIComponent(c.code)}" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;"><div class="cust-avatar">${escapeHtml((c.name || "?").slice(0, 2).toUpperCase())}</div>${escapeHtml(c.name)}</a></td>
         <td class="muted">${c.stamp_count} / ${summary ? summary.stamps_required : "-"}</td>
         <td class="muted">${escapeHtml(c.code)}</td>
+        <td><a class="btn ghost" href="/panel/fidelizacion/cliente/${encodeURIComponent(c.code)}" style="padding:6px 14px;font-size:12.5px;">Gestionar</a></td>
       </tr>`
     )
     .join("");
@@ -63,11 +64,12 @@ function pageBody(env, merchant, { summary, customers, promotions, config, notic
   const cfg = config || {};
   const logoSrc = cfg.logo_url ? `${lealtadBase}${cfg.logo_url}` : null;
   const stampIconSrc = cfg.stamp_icon_url ? `${lealtadBase}${cfg.stamp_icon_url}` : null;
+  const joinUrl = summary ? `${lealtadBase}/c/${summary.slug}/unirse` : null;
 
   return `
     <div class="topbar">
       <div><h1>Fidelización</h1><p>${summary ? escapeHtml(summary.stamps_required + " sellos = " + summary.reward_text) : ""}</p></div>
-      <a class="btn" href="/panel/fidelizacion/ir">Escanear cliente</a>
+      <a class="btn" href="/panel/fidelizacion/escanear">Escanear cliente</a>
     </div>
 
     ${notice ? `<div class="notice">${escapeHtml(notice)}</div>` : ""}
@@ -129,14 +131,23 @@ function pageBody(env, merchant, { summary, customers, promotions, config, notic
       </table>
     </div>
 
+    ${
+      joinUrl
+        ? `<div class="card" style="margin-bottom:16px;max-width:560px;">
+      <div class="card-head"><div><h3>Enlace de inscripción</h3><div class="sub">Compártelo para que tus clientes se unan al programa</div></div></div>
+      <input readonly value="${escapeHtml(joinUrl)}" onclick="this.select()" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:13px;">
+      <a class="btn ghost" href="${escapeHtml(joinUrl)}" target="_blank" rel="noopener" style="display:block;text-align:center;margin-top:10px;">Abrir formulario de inscripción</a>
+    </div>`
+        : ""
+    }
+
     <div class="card" data-wide>
       <div class="card-head">
         <div><h3>Clientes</h3><div class="sub">Los más recientes</div></div>
-        <a class="btn ghost" href="/panel/fidelizacion/ir">Abrir panel completo</a>
       </div>
       <table>
-        <thead><tr><th>Cliente</th><th>Sellos</th><th>Código</th></tr></thead>
-        <tbody>${rows || '<tr><td colspan="3" class="muted">Todavía no tienes clientes inscritos.</td></tr>'}</tbody>
+        <thead><tr><th>Cliente</th><th>Sellos</th><th>Código</th><th></th></tr></thead>
+        <tbody>${rows || '<tr><td colspan="4" class="muted">Todavía no tienes clientes inscritos.</td></tr>'}</tbody>
       </table>
     </div>`;
 }
