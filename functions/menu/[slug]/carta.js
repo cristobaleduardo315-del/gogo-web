@@ -1,19 +1,19 @@
 // Carta pública: índice de categorías + acordeón (una categoría visible a
-// la vez, con botón "Volver al menú" y nav inferior fija) — port fiel de la
-// carta que ya existía en Shopify (theme_export de West Burger). Segunda
-// página del sitio del negocio (la portada vive en /menu/:slug). Sin
-// autenticación, lee datos en vivo de D1: cualquier cambio guardado en
+// la vez) + canasta de compra flotante — port fiel de la carta que ya
+// existía en Shopify (theme_export de West Burger, versión con carrito).
+// Segunda página del sitio del negocio (la portada vive en /menu/:slug).
+// Sin autenticación, lee datos en vivo de D1: cualquier cambio guardado en
 // /panel/menu se refleja acá al instante.
 import { escapeHtml } from "../../lib/layout.js";
 import { loadPublicMenu, formatCOP } from "../../lib/menuData.js";
 import {
-  waLink,
   FONT_LINKS,
   themeVars,
   rootCss,
   BACK_ICON,
   FOOD_ICON_DEFS,
   categoryIconId,
+  jsAttr,
   notFoundPage,
 } from "../../lib/menuTheme.js";
 
@@ -25,6 +25,7 @@ function pageHtml({ page, merchant, categories }) {
   const v = themeVars(page);
   const visibleCats = categories.filter((c) => c.products.length);
   const homeUrl = `/menu/${page.slug}`;
+  const waDigits = String(page.whatsapp_phone || "").replace(/[^0-9]/g, "");
 
   const navLinks = visibleCats
     .map((c) => `<a href="#" onclick="showCat('${c.id}'); return false;">${escapeHtml(c.name)}</a>`)
@@ -41,7 +42,7 @@ function pageHtml({ page, merchant, categories }) {
       const iconId = categoryIconId(cat.name);
       const items = cat.products
         .map((p) => {
-          const itemLink = waLink(page.whatsapp_phone, p.name);
+          const price = Number(p.price) || 0;
           const img = p.image_url
             ? `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">`
             : `<svg class="wb-icon"><use href="#${iconId}"/></svg>`;
@@ -51,8 +52,10 @@ function pageHtml({ page, merchant, categories }) {
           <div class="wb-item-body">
             <p class="wb-item-name">${escapeHtml(p.name)}</p>
             ${p.description ? `<p class="wb-item-desc">${escapeHtml(p.description)}</p>` : ""}
-            <p class="wb-item-price">${formatCOP(p.price)}</p>
-            ${itemLink ? `<a class="wb-item-order" href="${itemLink}" target="_blank" rel="noopener">Pedir por WhatsApp</a>` : ""}
+            <div class="wb-buy">
+              <span class="wb-buy-price">${formatCOP(price)}</span>
+              <button class="wb-buy-btn" onclick="addToCart('${p.id}', ${jsAttr(p.name)}, ${price})"><svg class="wb-icon"><use href="#ic-plus"/></svg>Añadir</button>
+            </div>
           </div>
         </div>`;
         })
@@ -78,7 +81,7 @@ ${FONT_LINKS}
   *{box-sizing:border-box;margin:0;padding:0;}
   :root{ ${rootCss(v)} }
   body{font-family:'Sora',sans-serif;}
-  .wb-wrap2{background:var(--cream);padding:0 0 52px;font-family:'Sora',sans-serif;position:relative;overflow:hidden;min-height:100vh;}
+  .wb-wrap2{background:var(--cream);padding:0 0 88px;font-family:'Sora',sans-serif;position:relative;overflow:hidden;min-height:100vh;}
   .wb-bg{position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;z-index:0;pointer-events:none;}
   .wb-bg img{position:absolute;opacity:1;width:170px;height:auto;}
   .wb-bg .float1{top:6%;left:3%;animation:floatA 9s ease-in-out infinite;}
@@ -89,6 +92,13 @@ ${FONT_LINKS}
   @keyframes floatA{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-24px) rotate(6deg);}}
   @keyframes floatB{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(20px) rotate(-6deg);}}
   @keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+  /* ===== Canasta flotante ===== */
+  .wb-fab{position:fixed;top:16px;right:16px;z-index:40;width:56px;height:56px;border-radius:50%;background:var(--cream);border:2px solid var(--theme);box-shadow:0 4px 14px rgba(0,0,0,0.25);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--theme);transition:transform 0.2s;}
+  .wb-fab:hover{transform:scale(1.06);}
+  .wb-fab .wb-icon{width:26px;height:26px;}
+  .wb-fab-badge{position:absolute;top:-4px;right:-4px;min-width:22px;height:22px;padding:0 5px;border-radius:11px;background:var(--theme);color:var(--cream);font-family:'Sora',sans-serif;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;box-sizing:border-box;}
+
   .wb-navbar{position:fixed;bottom:0;left:0;width:100%;z-index:20;background:var(--theme);padding:10px 0;display:none;box-shadow:0 -3px 14px rgba(0,0,0,0.2);}
   .wb-navbar.show{display:block;}
   .wb-navbar-scroll{display:flex;gap:8px;overflow-x:auto;padding:0 16px;max-width:940px;margin:0 auto;scrollbar-width:none;}
@@ -121,11 +131,39 @@ ${FONT_LINKS}
   .wb-item-body::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--cream);}
   .wb-item-name{font-family:'Sora',sans-serif;font-size:clamp(15px,4vw,17px);font-weight:700;color:var(--cream);line-height:1.2;margin:0;}
   .wb-item-desc{font-family:'Sora',sans-serif;font-size:clamp(11px,3vw,12px);font-weight:700;color:#ffffff;line-height:1.55;margin:0;flex:1;}
-  .wb-item-price{font-family:'Sora',sans-serif;font-size:clamp(14px,4vw,16px);font-weight:700;color:var(--cream);margin:8px 0 0;}
-  .wb-item-order{display:inline-block;margin-top:2px;font-size:11.5px;font-weight:700;color:var(--cream);text-decoration:underline;}
+
+  /* ===== Recuadro precio + añadir (crema) ===== */
+  .wb-buy{margin-top:12px;background:var(--cream);border-radius:12px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .wb-buy-price{font-family:'Sora',sans-serif;font-weight:700;font-size:clamp(15px,4vw,18px);color:var(--theme);}
+  .wb-buy-btn{display:inline-flex;align-items:center;gap:6px;background:var(--theme);color:var(--cream);border:none;border-radius:40px;padding:9px 15px;font-family:'Sora',sans-serif;font-weight:700;font-size:12px;letter-spacing:0.05em;text-transform:uppercase;cursor:pointer;transition:background 0.2s,transform 0.2s;white-space:nowrap;}
+  .wb-buy-btn:hover{background:var(--theme-darker);transform:translateY(-2px);}
+  .wb-buy-btn .wb-icon{width:15px;height:15px;}
+
   .wb-back{display:inline-block;margin-top:30px;font-family:'Sora',sans-serif;font-size:clamp(12px,3.2vw,13px);font-weight:700;color:var(--cream);background:var(--theme);padding:13px 28px;border-radius:40px;cursor:pointer;border:none;letter-spacing:0.08em;text-transform:uppercase;transition:background 0.2s;}
   .wb-back:hover{background:var(--theme-darker);color:#ffffff;}
   .wb-empty{padding:60px 20px;text-align:center;color:#8a8272;}
+
+  /* ===== Canasta (sección) ===== */
+  .wb-cart-row{display:flex;align-items:center;gap:12px;background:var(--theme);border-radius:12px;padding:12px 14px;margin-bottom:10px;}
+  .wb-cart-info{flex:1;min-width:0;}
+  .wb-cart-name{color:var(--cream);font-weight:700;margin:0;font-size:clamp(13px,3.5vw,15px);}
+  .wb-cart-sub{color:#fff;font-weight:700;margin:2px 0 0;font-size:clamp(12px,3vw,13px);}
+  .wb-cart-qty{display:flex;align-items:center;gap:10px;}
+  .wb-cart-qty button{width:30px;height:30px;border-radius:50%;border:none;background:var(--cream);color:var(--theme);font-size:18px;font-weight:700;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center;}
+  .wb-cart-qty span{color:var(--cream);font-weight:700;min-width:16px;text-align:center;}
+  .wb-cart-del{background:transparent;border:none;cursor:pointer;color:var(--cream);padding:4px;display:flex;align-items:center;}
+  .wb-cart-del .wb-icon{width:20px;height:20px;}
+  .wb-cart-empty{color:var(--theme);font-weight:700;text-align:center;padding:30px 0;}
+  .wb-cart-total{text-align:right;color:var(--theme);font-weight:700;font-size:clamp(18px,5vw,22px);margin:18px 0 0;}
+  .wb-cart-actions{display:flex;flex-direction:column;gap:12px;align-items:center;margin-top:20px;}
+  .wb-cart-wa{width:min(360px,100%);background:var(--theme);color:var(--cream);border:none;border-radius:40px;padding:15px 24px;font-family:'Sora',sans-serif;font-weight:700;font-size:clamp(13px,3.5vw,15px);letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:background 0.2s,transform 0.2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+  .wb-cart-wa:hover{background:var(--theme-darker);transform:translateY(-2px);}
+  .wb-cart-wa .wb-icon{width:18px;height:18px;}
+
+  /* ===== Toast ===== */
+  .wb-toast{position:fixed;left:50%;bottom:78px;transform:translateX(-50%) translateY(20px);background:var(--theme);color:var(--cream);padding:12px 22px;border-radius:40px;font-family:'Sora',sans-serif;font-weight:700;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,0.3);opacity:0;pointer-events:none;transition:opacity 0.25s,transform 0.25s;z-index:50;}
+  .wb-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
   @media (max-width:640px){
     .wb-inner{padding:16px 16px 0;}
     .wb-grid{grid-template-columns:1fr;gap:14px;}
@@ -141,6 +179,11 @@ ${FONT_LINKS}
 <body>
 
 ${FOOD_ICON_DEFS}
+
+<button class="wb-fab" id="wb-fab" onclick="showCart()" aria-label="Ver canasta">
+  <svg class="wb-icon"><use href="#ic-cart"/></svg>
+  <span class="wb-fab-badge" id="wb-badge" style="display:none">0</span>
+</button>
 
 <div class="wb-navbar" id="wb-navbar">
   <div class="wb-navbar-scroll">${navLinks}</div>
@@ -170,10 +213,115 @@ ${FOOD_ICON_DEFS}
     </div>
 
     ${catSections}
+
+    <div class="wb-cat" id="carrito">
+      <div class="wb-cat-header"><span class="wb-cat-label">Tu canasta</span><div class="wb-cat-line"></div></div>
+      <div id="wb-cart-items"></div>
+      <p id="wb-cart-total" class="wb-cart-total"></p>
+      <div id="wb-cart-actions" class="wb-cart-actions" style="display:none">
+        ${waDigits ? `<button class="wb-cart-wa" onclick="pedirWhatsApp()"><svg class="wb-icon"><use href="#ic-wa"/></svg>Pedir por WhatsApp</button>` : ""}
+        <button class="wb-back" onclick="backToIndex()">← Seguir pidiendo</button>
+      </div>
+    </div>
   </div>
 </div>
 
+<div class="wb-toast" id="wb-toast"></div>
+
 <script>
+  var cart = {};
+  var BUSINESS_NAME = ${JSON.stringify(merchant.business_name).replace(/<\//g, "<\\/")};
+  var WA_DIGITS = ${JSON.stringify(waDigits)};
+
+  function formatPrice(n){ return '$' + n.toLocaleString('es-CO'); }
+
+  function updateBadge(){
+    var count = 0;
+    Object.keys(cart).forEach(function(id){ count += cart[id].qty; });
+    var badge = document.getElementById('wb-badge');
+    if(count > 0){ badge.textContent = count; badge.style.display = 'flex'; }
+    else { badge.style.display = 'none'; }
+  }
+
+  var toastTimer;
+  function showToast(msg){
+    var t = document.getElementById('wb-toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 1500);
+  }
+
+  function addToCart(id, name, price){
+    if(cart[id]){ cart[id].qty++; }
+    else { cart[id] = { name: name, price: price, qty: 1 }; }
+    updateBadge();
+    if(document.getElementById('carrito').classList.contains('visible')){ renderCart(); }
+    showToast(name + ' añadido');
+  }
+
+  function changeQty(id, delta){
+    if(!cart[id]) return;
+    cart[id].qty += delta;
+    if(cart[id].qty <= 0){ delete cart[id]; }
+    renderCart();
+  }
+
+  function removeItem(id){ delete cart[id]; renderCart(); }
+
+  function renderCart(){
+    var cont = document.getElementById('wb-cart-items');
+    var ids = Object.keys(cart);
+    if(ids.length === 0){
+      cont.innerHTML = '<p class="wb-cart-empty">Tu canasta está vacía. Agrega productos desde el menú.</p>';
+      document.getElementById('wb-cart-total').textContent = '';
+      document.getElementById('wb-cart-actions').style.display = 'none';
+      updateBadge();
+      return;
+    }
+    var html = '';
+    var total = 0;
+    ids.forEach(function(id){
+      var it = cart[id];
+      var sub = it.price * it.qty;
+      total += sub;
+      html += '<div class="wb-cart-row">'
+        + '<div class="wb-cart-info"><p class="wb-cart-name"></p>'
+        + '<p class="wb-cart-sub">' + formatPrice(sub) + '</p></div>'
+        + '<div class="wb-cart-qty">'
+        + '<button onclick="changeQty(\\'' + id + '\\',-1)">−</button>'
+        + '<span>' + it.qty + '</span>'
+        + '<button onclick="changeQty(\\'' + id + '\\',1)">+</button>'
+        + '</div>'
+        + '<button class="wb-cart-del" onclick="removeItem(\\'' + id + '\\')" aria-label="Eliminar"><svg class="wb-icon"><use href="#ic-trash"/></svg></button>'
+        + '</div>';
+    });
+    cont.innerHTML = html;
+    // Nombre del producto vía textContent (no interpolado en el HTML) para
+    // que un nombre con caracteres especiales nunca rompa el layout.
+    var rows = cont.querySelectorAll('.wb-cart-row');
+    ids.forEach(function(id, i){ rows[i].querySelector('.wb-cart-name').textContent = cart[id].name; });
+    document.getElementById('wb-cart-total').textContent = 'Total: ' + formatPrice(total);
+    document.getElementById('wb-cart-actions').style.display = 'flex';
+    updateBadge();
+  }
+
+  function pedirWhatsApp(){
+    var ids = Object.keys(cart);
+    if(ids.length === 0 || !WA_DIGITS){ return; }
+    var msg = '¡Hola ' + BUSINESS_NAME + '! Quiero hacer este pedido:\\n\\n';
+    var total = 0;
+    ids.forEach(function(id){
+      var it = cart[id];
+      var sub = it.price * it.qty;
+      total += sub;
+      msg += '• ' + it.qty + 'x ' + it.name + ' — ' + formatPrice(sub) + '\\n';
+    });
+    msg += '\\n*Total: ' + formatPrice(total) + '*';
+    var url = 'https://api.whatsapp.com/send?phone=' + WA_DIGITS + '&text=' + encodeURIComponent(msg);
+    window.open(url, '_blank');
+  }
+
   function showCat(id) {
     document.getElementById('wb-index-section').style.display = 'none';
     document.querySelectorAll('.wb-cat').forEach(function(el) { el.classList.remove('visible'); });
@@ -186,6 +334,20 @@ ${FOOD_ICON_DEFS}
   function hideCat(id) {
     var target = document.getElementById(id);
     if (target) target.classList.remove('visible');
+    document.getElementById('wb-index-section').style.display = 'block';
+    document.getElementById('wb-navbar').classList.remove('show');
+    window.scrollTo({ top: document.getElementById('wb-index-section').offsetTop - 20, behavior: 'smooth' });
+  }
+  function showCart() {
+    document.getElementById('wb-index-section').style.display = 'none';
+    document.querySelectorAll('.wb-cat').forEach(function(el) { el.classList.remove('visible'); });
+    document.getElementById('carrito').classList.add('visible');
+    document.getElementById('wb-navbar').classList.add('show');
+    renderCart();
+    window.scrollTo({ top: document.getElementById('carrito').offsetTop - 60, behavior: 'smooth' });
+  }
+  function backToIndex() {
+    document.querySelectorAll('.wb-cat').forEach(function(el) { el.classList.remove('visible'); });
     document.getElementById('wb-index-section').style.display = 'block';
     document.getElementById('wb-navbar').classList.remove('show');
     window.scrollTo({ top: document.getElementById('wb-index-section').offsetTop - 20, behavior: 'smooth' });
