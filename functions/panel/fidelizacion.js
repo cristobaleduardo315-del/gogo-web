@@ -119,8 +119,22 @@ export async function onRequestGet({ request, env }) {
     return html(renderShell({ title: "Fidelización", active: "fidelizacion", merchant, bodyHtml: body }));
   }
 
+  // notice/error llegan como query string tras el redirect tipo POST →
+  // redirect → GET tras enviar una promoción (ver onRequestPost). Evita
+  // reenviar el formulario si el usuario refresca la página.
+  const url = new URL(request.url);
+  const notice = url.searchParams.get("notice") || undefined;
+  const error = url.searchParams.get("error") || undefined;
+
   const data = await loadData(env, merchant);
-  return html(renderShell({ title: "Fidelización", active: "fidelizacion", merchant, bodyHtml: pageBody(merchant, data) }));
+  return html(
+    renderShell({
+      title: "Fidelización",
+      active: "fidelizacion",
+      merchant,
+      bodyHtml: pageBody(merchant, { ...data, notice, error }),
+    })
+  );
 }
 
 export async function onRequestPost(context) {
@@ -139,6 +153,11 @@ export async function onRequestPost(context) {
   }
 }
 
+// Patrón POST → redirect → GET: la respuesta del POST solo hace la llamada
+// a sendLealtadPromotion y redirige de inmediato (sin volver a consultar
+// loadData ni renderizar HTML aquí). El GET que sigue al redirect ya está
+// probado y es confiable; esto reduce al mínimo el trabajo que hace la
+// función en el propio POST.
 async function handlePost({ request, env }) {
   const merchant = await requireMerchant(request, env);
   if (!merchant) return new Response(null, { status: 302, headers: { Location: "/login" } });
@@ -151,31 +170,13 @@ async function handlePost({ request, env }) {
   const body = String(formData.get("body") || "").trim();
 
   if (!header || !body) {
-    const data = await loadData(env, merchant);
-    return html(
-      renderShell({
-        title: "Fidelización",
-        active: "fidelizacion",
-        merchant,
-        bodyHtml: pageBody(merchant, { ...data, error: "Completa el título y el mensaje." }),
-      }),
-      400
-    );
+    const qs = "error=" + encodeURIComponent("Completa el título y el mensaje.");
+    return new Response(null, { status: 302, headers: { Location: "/panel/fidelizacion?" + qs } });
   }
 
   const result = await sendLealtadPromotion(env, merchant.lealtad_merchant_id, { header, body });
-  const data = await loadData(env, merchant);
-  return html(
-    renderShell({
-      title: "Fidelización",
-      active: "fidelizacion",
-      merchant,
-      bodyHtml: pageBody(merchant, {
-        ...data,
-        notice: result.ok ? "Promoción enviada." : undefined,
-        error: result.ok ? undefined : result.data?.error || "No se pudo enviar la notificación.",
-      }),
-    }),
-    result.ok ? 200 : 502
-  );
+  const qs = result.ok
+    ? "notice=" + encodeURIComponent("Promoción enviada.")
+    : "error=" + encodeURIComponent(result.data?.error || "No se pudo enviar la notificación.");
+  return new Response(null, { status: 302, headers: { Location: "/panel/fidelizacion?" + qs } });
 }
