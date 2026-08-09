@@ -19,7 +19,8 @@ export async function onRequestGet({ request, env }) {
     });
   }
 
-  const result = await getWalletDebug(env, merchant.lealtad_merchant_id);
+  const fix = new URL(request.url).searchParams.get("fix") === "1";
+  const result = await getWalletDebug(env, merchant.lealtad_merchant_id, { fix });
   return new Response(JSON.stringify(result, null, 2), {
     status: 200,
     headers: { "Content-Type": "application/json; charset=utf-8" },
