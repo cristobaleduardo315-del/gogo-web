@@ -33,6 +33,27 @@ export async function incrementQrScan(db, slug) {
   await db.prepare("UPDATE menu_pages SET qr_scan_count = qr_scan_count + 1 WHERE slug = ?").bind(slug).run();
 }
 
+// Registra un escaneo del QR del menú con fecha (ver migrations/0008).
+export async function logQrScan(db, merchantId, now) {
+  await db.prepare("INSERT INTO qr_scans (merchant_id, scanned_at) VALUES (?, ?)").bind(merchantId, now).run();
+}
+
+// Escaneos agrupados por día (YYYY-MM-DD) desde `sinceTs` -- lo que consume
+// el dashboard (Resumen) para graficar. Si la tabla todavía no existe
+// (falta correr la migración 0008), el caller debe atrapar el error y
+// mostrar la gráfica vacía en vez de tumbar el dashboard.
+export async function listQrScansByDay(db, merchantId, sinceTs) {
+  const { results } = await db
+    .prepare(
+      `SELECT date(scanned_at / 1000, 'unixepoch') AS day, COUNT(*) AS count
+       FROM qr_scans WHERE merchant_id = ? AND scanned_at >= ?
+       GROUP BY day ORDER BY day ASC`
+    )
+    .bind(merchantId, sinceTs)
+    .all();
+  return results;
+}
+
 export async function isSlugTaken(db, slug, excludingMerchantId) {
   const row = await db
     .prepare("SELECT merchant_id FROM menu_pages WHERE slug = ? AND merchant_id != ?")

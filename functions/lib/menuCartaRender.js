@@ -86,6 +86,10 @@ ${FONT_LINKS}
 <style>
   *{box-sizing:border-box;margin:0;padding:0;}
   :root{ ${rootCss(v)} }
+  /* Mismo motivo que en la portada (menuHomeRender.js): sin esto, el
+     scroll elástico al llegar arriba/abajo del todo deja ver un destello
+     blanco detrás de .wb-wrap2 en vez del crema del diseño. */
+  html,body{background:var(--cream);}
   body{font-family:'Sora',sans-serif;}
   .wb-wrap2{background:var(--cream);padding:0 0 88px;font-family:'Sora',sans-serif;position:relative;overflow:hidden;min-height:100vh;}
   .wb-bg{position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;z-index:0;pointer-events:none;}

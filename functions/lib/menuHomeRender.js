@@ -61,6 +61,13 @@ ${FONT_LINKS}
 <style>
   *{box-sizing:border-box;margin:0;padding:0;}
   :root{ ${rootCss(v)} }
+  /* El fondo de la portada lo pinta .wb-hero, pero solo cubre el alto de la
+     pantalla (min-height:100vh) -- al hacer scroll elástico (el "rebote" de
+     iOS al llegar arriba/abajo del todo) se alcanza a ver el fondo real de
+     <body>, que sin esto queda blanco por defecto y corta la ilusión de
+     página a color completo. Mismo color que el hero para que el rebote
+     nunca se note. */
+  html,body{background:var(--theme);}
   .wb-hero{background:var(--theme);padding:0 0 56px;font-family:'Sora',sans-serif;position:relative;overflow:hidden;min-height:100vh;}
   .wb-bg-head{position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;z-index:0;pointer-events:none;}
   .wb-bg-head img{position:absolute;opacity:1;width:150px;height:auto;}
