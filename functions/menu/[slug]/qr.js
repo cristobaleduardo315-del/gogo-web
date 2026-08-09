@@ -22,11 +22,18 @@ export async function onRequestGet({ params, env }) {
   await incrementQrScan(env.DB, slug);
   // El log con fecha (para la gráfica del dashboard) no debe tumbar el
   // redirect si la migración 0008 todavía no corrió en producción.
+  let debugInsertError = null;
   try {
     await logQrScan(env.DB, page.merchant_id, Date.now());
   } catch (err) {
     console.error("logQrScan (menu):", err.message || err);
+    debugInsertError = err.message || String(err);
   }
   const destination = page.custom_domain ? `https://${page.custom_domain}/` : "/menu/" + encodeURIComponent(slug);
-  return new Response(null, { status: 302, headers: { Location: destination } });
+  // TODO(temporal): quitar X-Debug-Insert una vez confirmado que el log de
+  // escaneos inserta bien -- solo para diagnosticar el contador en 0.
+  return new Response(null, {
+    status: 302,
+    headers: { Location: destination, "X-Debug-Insert": debugInsertError || "ok", "X-Debug-Merchant-Id": String(page.merchant_id) },
+  });
 }
