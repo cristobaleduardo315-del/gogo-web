@@ -101,3 +101,38 @@ export async function getLealtadSsoUrl(env, lealtadMerchantId) {
   const base = env.GOGO_LEALTAD_URL.replace(/\/$/, "");
   return `${base}/sso/${data.token}`;
 }
+
+// ---------- Gestión de clientes (escanear QR, ajustar sellos, canjear) ----------
+// Con esto el flujo completo de escaneo y gestión de un cliente vive en el
+// dashboard central: gogo-web nunca redirige al dueño del negocio a
+// gogo-lealtad para nada de esto.
+
+// Busca un cliente por su código (sin sumar sellos todavía) — se usa tanto
+// al escanear un QR como al abrir la ficha de un cliente puntual.
+export async function lookupLealtadCustomer(env, lealtadMerchantId, code) {
+  return call(env, `/internal/api/merchants/${lealtadMerchantId}/customers/lookup`, {
+    method: "POST",
+    body: { code },
+  });
+}
+
+export async function getLealtadCustomer(env, lealtadMerchantId, code) {
+  return call(env, `/internal/api/merchants/${lealtadMerchantId}/customers/${encodeURIComponent(code)}`);
+}
+
+// direction: "add" (default) o "remove". source: "scan" (desde la cámara)
+// o "manual" (ajuste a mano desde la ficha del cliente) — queda en el
+// historial de gogo-lealtad para distinguir uno de otro.
+export async function stampLealtadCustomer(env, lealtadMerchantId, { code, quantity, direction, source }) {
+  return call(env, `/internal/api/merchants/${lealtadMerchantId}/customers/stamp`, {
+    method: "POST",
+    body: { code, quantity, direction, source },
+  });
+}
+
+export async function redeemLealtadCustomer(env, lealtadMerchantId, code) {
+  return call(env, `/internal/api/merchants/${lealtadMerchantId}/customers/redeem`, {
+    method: "POST",
+    body: { code },
+  });
+}
