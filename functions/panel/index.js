@@ -60,23 +60,15 @@ export async function onRequestGet({ request, env }) {
   const since = Date.parse(`${fromParam}T00:00:00Z`);
   const until = Date.parse(`${toParam}T00:00:00Z`) + 24 * 60 * 60 * 1000;
   let menuScans = [];
-  let debugMenuError = null;
   try {
     menuScans = await listQrScansByDay(env.DB, merchant.id, since, until);
   } catch (err) {
     console.error("listQrScansByDay (menu):", err.message || err);
-    debugMenuError = err.message || String(err);
   }
   let lealtadScans = [];
-  let debugLealtadError = null;
   if (merchant.lealtad_merchant_id) {
     const qrRes = await getLealtadQrScans(env, merchant.lealtad_merchant_id, { from: fromParam, to: toParam });
-    if (qrRes.ok) {
-      lealtadScans = qrRes.data.scans || [];
-      if (qrRes.data.debug) debugLealtadError = qrRes.data.debug;
-    } else {
-      debugLealtadError = `qrRes not ok: status=${qrRes.status}`;
-    }
+    if (qrRes.ok) lealtadScans = qrRes.data.scans || [];
   }
   const qrSeries = buildDateRangeSeries(menuScans, lealtadScans, fromParam, toParam);
   const qrTotals = qrScansTotals(qrSeries);
@@ -179,8 +171,7 @@ export async function onRequestGet({ request, env }) {
           ? qrScansChartSvg(qrSeries)
           : `<p class="muted" style="font-size:13px;">Todavía no hay escaneos registrados en este rango. Comparte el QR de tu menú o el de inscripción a fidelización para empezar a ver datos acá.</p>`
       }
-    </div>
-    <!-- debug-qr-scans: menu=${escapeHtml(debugMenuError || "ok")} | lealtad=${escapeHtml(debugLealtadError || "ok")} -->`;
+    </div>`;
 
   return new Response(renderShell({ title: "Resumen", active: "resumen", merchant, bodyHtml: body }), {
     headers: { "Content-Type": "text/html; charset=utf-8" },
