@@ -88,7 +88,7 @@ function pageBody(merchant, { page, categories, products, request, notice, error
     ${error ? `<div class="error">${escapeHtml(error)}</div>` : ""}
 
     <div class="card" style="margin-bottom:16px;max-width:640px;">
-      <div class="card-head"><div><h3>Tu página de menú</h3><div class="sub">Diseño propio de tu negocio, sin necesidad de tocar código.</div></div></div>
+      <div class="card-head"><div><h3>Tu página de menú</h3><div class="sub">El diseño ya está listo — acá solo ajustas el enlace y el contacto.</div></div></div>
       <form class="inline" method="POST" action="/panel/menu">
         <input type="hidden" name="form" value="settings">
         <label>Enlace público</label>
@@ -100,15 +100,6 @@ function pageBody(merchant, { page, categories, products, request, notice, error
         <input name="tagline" value="${escapeHtml((page && page.tagline) || "")}" placeholder="Ej. Hamburguesería artesanal desde 2015">
         <label>WhatsApp para domicilios (opcional)</label>
         <input name="whatsapp_phone" value="${escapeHtml((page && page.whatsapp_phone) || "")}" placeholder="Ej. 573001234567">
-        <label>Color de tu marca</label>
-        <input name="theme_color" type="color" value="${escapeHtml((page && page.theme_color) || "#3d47a0")}" style="height:42px;padding:4px;">
-        <label>Logo (URL de una imagen, opcional)</label>
-        <input name="logo_url" type="url" value="${escapeHtml((page && page.logo_url) || "")}" placeholder="https://…">
-        ${
-          page && page.logo_url
-            ? `<img src="${escapeHtml(page.logo_url)}" alt="" style="height:44px;margin-top:6px;border-radius:8px;">`
-            : ""
-        }
         <button class="btn" type="submit" style="margin-top:18px;">Guardar</button>
       </form>
     </div>
@@ -158,8 +149,6 @@ export async function onRequestPost({ request, env }) {
   const rawSlug = slugify(String(formData.get("slug") || ""));
   const tagline = String(formData.get("tagline") || "").trim();
   const whatsappPhone = String(formData.get("whatsapp_phone") || "").trim();
-  const themeColor = String(formData.get("theme_color") || "#3d47a0").trim();
-  const logoUrl = String(formData.get("logo_url") || "").trim();
 
   if (!rawSlug) {
     const qs = "error=" + encodeURIComponent("El enlace de tu menú no puede quedar vacío.");
@@ -169,6 +158,13 @@ export async function onRequestPost({ request, env }) {
     const qs = "error=" + encodeURIComponent("Ese enlace ya lo está usando otro negocio. Prueba con otro.");
     return new Response(null, { status: 302, headers: { Location: "/panel/menu?" + qs } });
   }
+
+  // El color de marca y el logo ya NO se editan desde acá — los configura
+  // GoGo al montar el negocio. Se preservan tal cual estén guardados para
+  // no perderlos al guardar el resto de ajustes.
+  const existingPage = await getMenuPage(env.DB, merchant.id);
+  const themeColor = (existingPage && existingPage.theme_color) || "#3d4eac";
+  const logoUrl = (existingPage && existingPage.logo_url) || null;
 
   await saveMenuPage(env.DB, merchant.id, { slug: rawSlug, themeColor, tagline, whatsappPhone, logoUrl });
   const qs = "notice=" + encodeURIComponent("Cambios guardados.");
