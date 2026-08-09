@@ -28,9 +28,19 @@ function qrTrackingUrl(request, slug) {
   return `${url.protocol}//${url.host}/menu/${slug}/qr`;
 }
 
+// El enlace que de verdad ve el cliente final: si el negocio tiene dominio
+// propio (menu_pages.custom_domain), es ahí donde debe aterrizar — no en
+// soygogo.com/menu/:slug, que solo existe para que el dueño administre y
+// para negocios sin dominio propio todavía. Mismo criterio que usa el
+// redirect del QR (functions/menu/[slug]/qr.js).
+function customerFacingUrl(request, slug, page) {
+  if (page && page.custom_domain) return `https://${page.custom_domain}/`;
+  return publicMenuUrl(request, slug);
+}
+
 function pageBody(merchant, { page, categories, products, request, notice, error }) {
   const slug = page ? page.slug : slugify(merchant.business_name) || merchant.id.slice(0, 8);
-  const publicUrl = publicMenuUrl(request, slug);
+  const publicUrl = customerFacingUrl(request, slug, page);
 
   const catRows = categories
     .map((cat) => {
