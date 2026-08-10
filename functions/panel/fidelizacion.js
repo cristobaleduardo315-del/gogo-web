@@ -125,6 +125,15 @@ function pageBody(env, merchant, { summary, customers, promotions, config, notic
       <div class="card-head">
         <div><h3>Recordatorio de cercanía</h3><div class="sub">Con la ubicación de tu negocio guardada, a los clientes que tengan la tarjeta en Google Wallet les puede aparecer un aviso en el celular cuando estén cerca -- sin que tengas que hacer nada más.</div></div>
       </div>
+      <div style="margin-bottom:18px;">
+        <label style="display:block;font-weight:700;font-size:13px;margin-bottom:6px;">Buscar en Google Maps</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="f_maps_query" placeholder="Ej. ${escapeHtml(merchant.business_name || "Mi negocio")}, ciudad" style="flex:1;padding:10px 12px;border:1px solid var(--border);border-radius:10px;font-size:13px;">
+          <button type="button" class="btn ghost" id="btnBuscarMaps" style="flex-shrink:0;">Buscar</button>
+        </div>
+        <div id="mapsResults" style="margin-top:10px;"></div>
+        <p class="muted" style="margin-top:8px;font-size:12px;">Elige la ficha correcta de tu negocio y las coordenadas de abajo se llenan solas.</p>
+      </div>
       <form class="inline" method="POST" action="/panel/fidelizacion">
         <input type="hidden" name="action" value="ubicacion">
         <button type="button" class="btn ghost" id="btnUsarUbicacion" style="margin:4px 0 16px;">Usar mi ubicación actual</button>
@@ -132,37 +141,116 @@ function pageBody(env, merchant, { summary, customers, promotions, config, notic
         <input name="latitude" id="f_latitude" type="number" step="any" min="-90" max="90" value="${cfg.latitude != null ? escapeHtml(String(cfg.latitude)) : ""}" placeholder="Ej. 4.438900">
         <label>Longitud</label>
         <input name="longitude" id="f_longitude" type="number" step="any" min="-180" max="180" value="${cfg.longitude != null ? escapeHtml(String(cfg.longitude)) : ""}" placeholder="Ej. -75.232200">
-        <p class="muted" style="margin-top:8px;font-size:12px;">Para que quede exacta, usa el botón mientras estás parado en el negocio, o copia las coordenadas desde Google Maps.</p>
+        <p class="muted" style="margin-top:8px;font-size:12px;">O usa el botón de arriba mientras estás parado en el negocio, o ingresa las coordenadas a mano.</p>
         <button class="btn" type="submit" style="margin-top:18px;">Guardar ubicación</button>
       </form>
     </div>
     <script>
     (function () {
       var btn = document.getElementById('btnUsarUbicacion');
-      if (!btn) return;
-      btn.addEventListener('click', function () {
-        if (!navigator.geolocation) {
-          alert('Tu navegador no soporta geolocalización. Puedes ingresar las coordenadas a mano.');
-          return;
+      if (btn) {
+        btn.addEventListener('click', function () {
+          if (!navigator.geolocation) {
+            alert('Tu navegador no soporta geolocalización. Puedes ingresar las coordenadas a mano.');
+            return;
+          }
+          var original = btn.textContent;
+          btn.disabled = true;
+          btn.textContent = 'Obteniendo ubicación...';
+          navigator.geolocation.getCurrentPosition(
+            function (pos) {
+              document.getElementById('f_latitude').value = pos.coords.latitude.toFixed(6);
+              document.getElementById('f_longitude').value = pos.coords.longitude.toFixed(6);
+              btn.disabled = false;
+              btn.textContent = original;
+            },
+            function () {
+              alert('No se pudo obtener tu ubicación. Revisa los permisos del navegador o ingresa las coordenadas a mano.');
+              btn.disabled = false;
+              btn.textContent = original;
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+          );
+        });
+      }
+
+      // Buscador de "Recordatorio de cercanía": busca el negocio en Google
+      // Maps (Places API, vía /panel/fidelizacion/buscar-ubicacion) y deja
+      // elegir la ficha correcta para llenar lat/lng automáticamente, en vez
+      // de tener que copiarlas a mano.
+      var searchBtn = document.getElementById('btnBuscarMaps');
+      var queryInput = document.getElementById('f_maps_query');
+      var resultsBox = document.getElementById('mapsResults');
+      if (searchBtn && queryInput && resultsBox) {
+        function escapeHtmlJs(s) {
+          var div = document.createElement('div');
+          div.textContent = s || '';
+          return div.innerHTML;
         }
-        var original = btn.textContent;
-        btn.disabled = true;
-        btn.textContent = 'Obteniendo ubicación...';
-        navigator.geolocation.getCurrentPosition(
-          function (pos) {
-            document.getElementById('f_latitude').value = pos.coords.latitude.toFixed(6);
-            document.getElementById('f_longitude').value = pos.coords.longitude.toFixed(6);
-            btn.disabled = false;
-            btn.textContent = original;
-          },
-          function () {
-            alert('No se pudo obtener tu ubicación. Revisa los permisos del navegador o ingresa las coordenadas a mano.');
-            btn.disabled = false;
-            btn.textContent = original;
-          },
-          { enableHighAccuracy: true, timeout: 10000 }
-        );
-      });
+        function doSearch() {
+          var q = queryInput.value.trim();
+          if (!q) return;
+          var original = searchBtn.textContent;
+          searchBtn.disabled = true;
+          searchBtn.textContent = 'Buscando...';
+          resultsBox.innerHTML = '';
+          fetch('/panel/fidelizacion/buscar-ubicacion', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query: q }),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { ok: r.ok, data: data };
+              });
+            })
+            .then(function (res) {
+              searchBtn.disabled = false;
+              searchBtn.textContent = original;
+              if (!res.ok || res.data.error) {
+                resultsBox.innerHTML =
+                  '<p class="muted" style="color:var(--red);">' + escapeHtmlJs(res.data.error || 'No se pudo buscar.') + '</p>';
+                return;
+              }
+              var results = res.data.results || [];
+              if (!results.length) {
+                resultsBox.innerHTML =
+                  '<p class="muted">No encontramos ese negocio en Google Maps. Puedes ingresar las coordenadas a mano abajo.</p>';
+                return;
+              }
+              results.forEach(function (place) {
+                var row = document.createElement('button');
+                row.type = 'button';
+                row.className = 'btn ghost';
+                row.style.cssText = 'display:block;width:100%;text-align:left;margin-bottom:6px;';
+                row.innerHTML =
+                  '<strong>' + escapeHtmlJs(place.name) + '</strong>' +
+                  '<div class="muted" style="font-size:12px;">' + escapeHtmlJs(place.address) + '</div>';
+                row.addEventListener('click', function () {
+                  document.getElementById('f_latitude').value = place.latitude.toFixed(6);
+                  document.getElementById('f_longitude').value = place.longitude.toFixed(6);
+                  Array.prototype.forEach.call(resultsBox.querySelectorAll('button'), function (b) {
+                    b.style.borderColor = '';
+                  });
+                  row.style.borderColor = 'var(--lime-text)';
+                });
+                resultsBox.appendChild(row);
+              });
+            })
+            .catch(function () {
+              searchBtn.disabled = false;
+              searchBtn.textContent = original;
+              resultsBox.innerHTML = '<p class="muted" style="color:var(--red);">No se pudo conectar. Intenta de nuevo.</p>';
+            });
+        }
+        searchBtn.addEventListener('click', doSearch);
+        queryInput.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            doSearch();
+          }
+        });
+      }
     })();
     </script>
 
