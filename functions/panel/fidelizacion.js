@@ -7,6 +7,7 @@ import {
   getLealtadPromotions,
   getLealtadConfig,
   updateLealtadConfig,
+  updateLealtadLocation,
   sendLealtadPromotion,
 } from "../lib/internalApi.js";
 
@@ -119,6 +120,51 @@ function pageBody(env, merchant, { summary, customers, promotions, config, notic
         <button class="btn" type="submit" style="margin-top:18px;">Guardar tarjeta</button>
       </form>
     </div>
+
+    <div class="card" style="margin-bottom:16px;max-width:560px;">
+      <div class="card-head">
+        <div><h3>Recordatorio de cercanía</h3><div class="sub">Con la ubicación de tu negocio guardada, a los clientes que tengan la tarjeta en Google Wallet les puede aparecer un aviso en el celular cuando estén cerca -- sin que tengas que hacer nada más.</div></div>
+      </div>
+      <form class="inline" method="POST" action="/panel/fidelizacion">
+        <input type="hidden" name="action" value="ubicacion">
+        <button type="button" class="btn ghost" id="btnUsarUbicacion" style="margin:4px 0 16px;">Usar mi ubicación actual</button>
+        <label>Latitud</label>
+        <input name="latitude" id="f_latitude" type="number" step="any" min="-90" max="90" value="${cfg.latitude != null ? escapeHtml(String(cfg.latitude)) : ""}" placeholder="Ej. 4.438900">
+        <label>Longitud</label>
+        <input name="longitude" id="f_longitude" type="number" step="any" min="-180" max="180" value="${cfg.longitude != null ? escapeHtml(String(cfg.longitude)) : ""}" placeholder="Ej. -75.232200">
+        <p class="muted" style="margin-top:8px;font-size:12px;">Para que quede exacta, usa el botón mientras estás parado en el negocio, o copia las coordenadas desde Google Maps.</p>
+        <button class="btn" type="submit" style="margin-top:18px;">Guardar ubicación</button>
+      </form>
+    </div>
+    <script>
+    (function () {
+      var btn = document.getElementById('btnUsarUbicacion');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        if (!navigator.geolocation) {
+          alert('Tu navegador no soporta geolocalización. Puedes ingresar las coordenadas a mano.');
+          return;
+        }
+        var original = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Obteniendo ubicación...';
+        navigator.geolocation.getCurrentPosition(
+          function (pos) {
+            document.getElementById('f_latitude').value = pos.coords.latitude.toFixed(6);
+            document.getElementById('f_longitude').value = pos.coords.longitude.toFixed(6);
+            btn.disabled = false;
+            btn.textContent = original;
+          },
+          function () {
+            alert('No se pudo obtener tu ubicación. Revisa los permisos del navegador o ingresa las coordenadas a mano.');
+            btn.disabled = false;
+            btn.textContent = original;
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      });
+    })();
+    </script>
 
     <div class="card" style="margin-bottom:16px;">
       <div class="card-head">
@@ -253,6 +299,10 @@ async function handlePost({ request, env }) {
     return handlePersonalizar({ formData, env, merchant });
   }
 
+  if (action === "ubicacion") {
+    return handleUbicacion({ formData, env, merchant });
+  }
+
   const header = String(formData.get("header") || "").trim();
   const body = String(formData.get("body") || "").trim();
 
@@ -337,5 +387,22 @@ async function handlePersonalizar({ formData, env, merchant }) {
   const qs = result.ok
     ? "notice=" + encodeURIComponent("Tarjeta actualizada.")
     : "error=" + encodeURIComponent(result.data?.error || "No se pudo guardar la tarjeta.");
+  return new Response(null, { status: 302, headers: { Location: "/panel/fidelizacion?" + qs } });
+}
+
+// Guarda la ubicación del negocio para el recordatorio de cercanía (ver
+// updateLealtadLocation / googleWallet.js). Endpoint separado del de
+// "personalizar" -- no depende de los demás campos de la tarjeta.
+async function handleUbicacion({ formData, env, merchant }) {
+  const latitude = Number(String(formData.get("latitude") || "").trim());
+  const longitude = Number(String(formData.get("longitude") || "").trim());
+  if (!Number.isFinite(latitude) || latitude < -90 || latitude > 90 || !Number.isFinite(longitude) || longitude < -180 || longitude > 180) {
+    const qs = "error=" + encodeURIComponent("Coordenadas inválidas. Usa el botón para tomar tu ubicación actual o revisa los valores.");
+    return new Response(null, { status: 302, headers: { Location: "/panel/fidelizacion?" + qs } });
+  }
+  const result = await updateLealtadLocation(env, merchant.lealtad_merchant_id, { latitude, longitude });
+  const qs = result.ok
+    ? "notice=" + encodeURIComponent("Ubicación guardada.")
+    : "error=" + encodeURIComponent(result.data?.error || "No se pudo guardar la ubicación.");
   return new Response(null, { status: 302, headers: { Location: "/panel/fidelizacion?" + qs } });
 }
