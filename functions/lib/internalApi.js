@@ -78,6 +78,17 @@ export async function updateLealtadConfig(env, lealtadMerchantId, config) {
   });
 }
 
+// Ubicación del negocio para el recordatorio de cercanía (ver
+// googleWallet.js del lado de gogo-lealtad): una vez guardada, Google
+// Wallet le puede avisar al cliente cuando su celular detecta que está
+// cerca de la tarjeta guardada.
+export async function updateLealtadLocation(env, lealtadMerchantId, { latitude, longitude }) {
+  return call(env, `/internal/api/merchants/${lealtadMerchantId}/location`, {
+    method: "PUT",
+    body: { latitude, longitude },
+  });
+}
+
 // Historial de promociones (notificaciones push) enviadas a las tarjetas de
 // Google Wallet guardadas.
 export async function getLealtadPromotions(env, lealtadMerchantId) {
