@@ -51,6 +51,27 @@
                   transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
+    /* iOS 26 Safari (Liquid Glass) pinta la zona del notch usando el background-color del elemento position:fixed pegado arriba del todo (nuestro header, que es transparente a proposito). Cuando no encuentra un color explicito ahi, cae en un negro por defecto que no combina con el degradado del hero, sin importar el padding o el viewport-fit que le pongamos al header real. Este div invisible de 4px, con un color solido igual al inicio del degradado del hero, le da a Safari algo real que copiar. No aplica en desktop ni en otros navegadores. */
+    #ios-status-bar-tint {
+      display: none;
+    }
+
+    @supports (-webkit-touch-callout: none) {
+      @media (max-width: 900px) {
+        #ios-status-bar-tint {
+          display: block;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          min-height: 4px;
+          z-index: 1001;
+          background-color: #131317;
+          pointer-events: none;
+        }
+      }
+    }
+
     .header-container {
       max-width: 1200px;
       margin: 0 auto;
@@ -517,6 +538,7 @@
   </style>
 </head>
 <body>
+  <div id="ios-status-bar-tint"></div>
 
   <!-- ================= HEADER FLOTANTE ================= -->
   <header class="site-header" id="siteHeader">
