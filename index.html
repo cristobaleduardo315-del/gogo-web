@@ -511,6 +511,9 @@
         gap: 16px;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
+        /* Difumina el borde derecho para que la tarjeta parcial no se vea 'cortada' sino como una pista intencional de que hay mas para deslizar */
+        -webkit-mask-image: linear-gradient(to right, black calc(100% - 56px), transparent 100%);
+        mask-image: linear-gradient(to right, black calc(100% - 56px), transparent 100%);
       }
 
       .cards-wrapper::-webkit-scrollbar {
