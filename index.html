@@ -511,9 +511,6 @@
         gap: 16px;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
-        /* Difumina el borde derecho para que la tarjeta parcial no se vea 'cortada' sino como una pista intencional de que hay mas para deslizar */
-        -webkit-mask-image: linear-gradient(to right, black calc(100% - 56px), transparent 100%);
-        mask-image: linear-gradient(to right, black calc(100% - 56px), transparent 100%);
       }
 
       .cards-wrapper::-webkit-scrollbar {
@@ -530,8 +527,8 @@
       }
 
       .cards-wrapper.has-active .card:not(.active) {
-        opacity: 1;
-        filter: none;
+        opacity: 0.45;
+        filter: grayscale(35%);
       }
       
       .card.active {
@@ -742,6 +739,39 @@
           }
         });
       });
+
+      // Enfoca automaticamente la tarjeta mas visible al deslizar en mobile,
+      // atenuando las demas (igual que el hover en desktop) para que la
+      // tarjeta parcial de al lado se vea como vista previa, no como un corte.
+      function actualizarTarjetaActivaMobile() {
+        if (!window.matchMedia('(max-width: 900px)').matches) return;
+        const wrapperRect = wrapper.getBoundingClientRect();
+        const centro = wrapperRect.left + wrapperRect.width / 2;
+        let masCercana = null;
+        let distanciaMinima = Infinity;
+        cards.forEach((card) => {
+          const r = card.getBoundingClientRect();
+          const centroTarjeta = r.left + r.width / 2;
+          const distancia = Math.abs(centroTarjeta - centro);
+          if (distancia < distanciaMinima) {
+            distanciaMinima = distancia;
+            masCercana = card;
+          }
+        });
+        if (masCercana) {
+          wrapper.classList.add('has-active');
+          cards.forEach((c) => c.classList.toggle('active', c === masCercana));
+        }
+      }
+
+      let tarjetaScrollTimeout;
+      wrapper.addEventListener('scroll', () => {
+        cancelAnimationFrame(tarjetaScrollTimeout);
+        tarjetaScrollTimeout = requestAnimationFrame(actualizarTarjetaActivaMobile);
+      }, { passive: true });
+
+      window.addEventListener('resize', actualizarTarjetaActivaMobile);
+      requestAnimationFrame(actualizarTarjetaActivaMobile);
 
       document.addEventListener('click', (e) => {
         if (!wrapper.contains(e.target)) {
