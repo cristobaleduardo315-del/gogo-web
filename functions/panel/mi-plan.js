@@ -1,16 +1,16 @@
 import { requireMerchant } from "../lib/auth.js";
 import { renderShell, escapeHtml } from "../lib/layout.js";
-
+ 
 const PLANS = [
-  { key: "start", name: "GoGo Start", price: 19 },
-  { key: "plus", name: "GoGo Plus", price: 39 },
-  { key: "pro", name: "GoGo Pro", price: 79 },
+  { key: "start", name: "GoGo Start", price: "69.900" },
+  { key: "plus", name: "GoGo Growth", price: "129.900" },
+  { key: "pro", name: "GoGo Pro", price: "249.900" },
 ];
-
+ 
 function html(body, status = 200) {
   return new Response(body, { status, headers: { "Content-Type": "text/html; charset=utf-8" } });
 }
-
+ 
 function pageBody(merchant, { notice, pendingPlan } = {}) {
   const cards = PLANS.map((p) => {
     const isCurrent = p.key === merchant.plan;
@@ -27,7 +27,7 @@ function pageBody(merchant, { notice, pendingPlan } = {}) {
       }
     </div>`;
   }).join("");
-
+ 
   return `
     <div class="topbar"><div><h1>Mi plan</h1><p>Tu plan actual y opciones para cambiarlo.</p></div></div>
     ${notice ? `<div class="notice">${escapeHtml(notice)}</div>` : ""}
@@ -38,7 +38,7 @@ function pageBody(merchant, { notice, pendingPlan } = {}) {
     }
     <div style="display:flex;gap:16px;flex-wrap:wrap;">${cards}</div>`;
 }
-
+ 
 export async function onRequestGet({ request, env }) {
   const merchant = await requireMerchant(request, env);
   if (!merchant) return new Response(null, { status: 302, headers: { Location: "/login" } });
@@ -56,7 +56,7 @@ export async function onRequestGet({ request, env }) {
     })
   );
 }
-
+ 
 export async function onRequestPost({ request, env }) {
   const merchant = await requireMerchant(request, env);
   if (!merchant) return new Response(null, { status: 302, headers: { Location: "/login" } });
