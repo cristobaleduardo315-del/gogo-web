@@ -2479,10 +2479,10 @@
           Mensual
         </button>
         <button type="button" class="billing-btn" onclick="setBillingPeriod('quarterly')">
-          Trimestral <span class="billing-badge">-15%</span>
+          Trimestral <span class="billing-badge">-5%</span>
         </button>
         <button type="button" class="billing-btn" onclick="setBillingPeriod('annual')">
-          Anual <span class="billing-badge">-30%</span>
+          Anual <span class="billing-badge">-17%</span>
         </button>
       </div>
     </div>
@@ -2503,7 +2503,7 @@
           <div class="plan-pricing-box">
             <div class="plan-price-wrap">
               <span class="plan-currency">$</span>
-              <span class="plan-amount" id="price-start">19</span>
+              <span class="plan-amount" id="price-start">69.900</span>
               <span class="plan-period" id="period-start">/ mes</span>
             </div>
           </div>
@@ -2568,8 +2568,8 @@
         <span class="badge-featured">Más elegido</span>
         
         <div>
-          <span class="plan-kicker">PLUS</span>
-          <h3 class="plan-name">GoGo Plus</h3>
+          <span class="plan-kicker">GROWTH</span>
+          <h3 class="plan-name">GoGo Growth ⭐</h3>
           <p class="plan-description">
             La mejor relación entre precio y todo lo que necesitas para vender más.
           </p>
@@ -2578,7 +2578,7 @@
           <div class="plan-pricing-box">
             <div class="plan-price-wrap">
               <span class="plan-currency">$</span>
-              <span class="plan-amount" id="price-plus">39</span>
+              <span class="plan-amount" id="price-plus">129.900</span>
               <span class="plan-period" id="period-plus">/ mes</span>
             </div>
           </div>
@@ -2643,7 +2643,7 @@
           </ul>
         </div>
 
-        <a href="#resumen-plan" id="btn-plus" class="plan-btn" onclick="mostrarResumenPlan('plus'); return false;">Elegir Plus</a>
+        <a href="#resumen-plan" id="btn-plus" class="plan-btn" onclick="mostrarResumenPlan('plus'); return false;">Elegir Growth</a>
       </div>
 
       <!-- Plan 3: PRO -->
@@ -2659,7 +2659,7 @@
           <div class="plan-pricing-box">
             <div class="plan-price-wrap">
               <span class="plan-currency">$</span>
-              <span class="plan-amount" id="price-pro">79</span>
+              <span class="plan-amount" id="price-pro">249.900</span>
               <span class="plan-period" id="period-pro">/ mes</span>
             </div>
           </div>
@@ -2671,7 +2671,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
               </span>
-              Todo lo del plan Plus
+              Todo lo del plan Growth
             </li>
             <li>
               <span class="check-icon">
@@ -2730,25 +2730,25 @@
   // para armar el resumen del plan al hacer clic en "Elegir ...").
   let currentBillingPeriod = 'monthly';
 
-  // Precios de referencia en USD según el período
+  // Precios de referencia en COP según el período
   const pricingData = {
     monthly: {
       periodLabel: '/ mes',
-      startPrice: '19',
-      plusPrice: '39',
-      proPrice: '79'
+      startPrice: '69.900',
+      plusPrice: '129.900',
+      proPrice: '249.900'
     },
     quarterly: {
-      periodLabel: '/ mes (cobro trimestral)',
-      startPrice: '16',  // ~15% desc.
-      plusPrice: '33',   // ~15% desc.
-      proPrice: '67'     // ~15% desc.
+      periodLabel: '/ 3 meses',
+      startPrice: '199.000',  // ~5% desc. vs mensual x3
+      plusPrice: '369.000',   // ~5% desc. vs mensual x3
+      proPrice: '709.000'     // ~5% desc. vs mensual x3
     },
     annual: {
-      periodLabel: '/ mes (cobro anual)',
-      startPrice: '13',  // ~30% desc.
-      plusPrice: '27',   // ~30% desc.
-      proPrice: '55'     // ~30% desc.
+      periodLabel: '/ año',
+      startPrice: '699.000',  // ~17% desc. vs mensual x12
+      plusPrice: '1.299.000', // ~17% desc. vs mensual x12
+      proPrice: '2.499.000'   // ~17% desc. vs mensual x12
     }
   };
 
@@ -3042,8 +3042,8 @@
 
     <div class="resumen-card">
       <div>
-        <span class="resumen-plan-kicker" id="resumen-plan-kicker">PLUS</span>
-        <h3 class="resumen-plan-name" id="resumen-plan-name">GoGo Plus</h3>
+        <span class="resumen-plan-kicker" id="resumen-plan-kicker">GROWTH</span>
+        <h3 class="resumen-plan-name" id="resumen-plan-name">GoGo Growth</h3>
         <p class="resumen-plan-description" id="resumen-plan-description"></p>
 
         <ul class="resumen-features" id="resumen-plan-features"></ul>
@@ -3052,7 +3052,7 @@
       <div class="resumen-summary-box">
         <div class="resumen-line">
           <span>Plan</span>
-          <span id="resumen-line-plan">GoGo Plus</span>
+          <span id="resumen-line-plan">GoGo Growth</span>
         </div>
         <div class="resumen-line">
           <span>Periodicidad</span>
@@ -3060,7 +3060,7 @@
         </div>
         <div class="resumen-line resumen-line-total">
           <span>Total a pagar</span>
-          <span id="resumen-line-total">$39 / mes</span>
+          <span id="resumen-line-total">$129.900 / mes</span>
         </div>
 
         <button type="button" class="resumen-pagar-btn" id="resumen-pagar-btn" onclick="procesarPago()">
@@ -3095,8 +3095,8 @@
       ]
     },
     plus: {
-      kicker: 'PLUS',
-      name: 'GoGo Plus',
+      kicker: 'GROWTH',
+      name: 'GoGo Growth',
       description: 'La mejor relación entre precio y todo lo que necesitas para vender más.',
       features: [
         'Todo lo del plan Start',
@@ -3113,7 +3113,7 @@
       name: 'GoGo Pro',
       description: 'Para negocios que quieren ofrecer una experiencia completa y escalar.',
       features: [
-        'Todo lo del plan Plus',
+        'Todo lo del plan Growth',
         'Productos ilimitados',
         'Varias sedes o sucursales',
         'Promociones destacadas',
@@ -4094,7 +4094,7 @@
         
         <div class="footer-socials">
           <!-- Instagram -->
-          <a href="#" class="social-icon" aria-label="Instagram">
+          <a href="https://www.instagram.com/gogosomos/" class="social-icon" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
             <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
           </a>
           <!-- WhatsApp -->
