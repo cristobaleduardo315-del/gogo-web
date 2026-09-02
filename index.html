@@ -282,6 +282,22 @@
       color: #dddddd;
     }
 
+    /* Evita que "Tan simple como enviar un link" se parta en dos líneas
+       en pantallas medianas/grandes; en mobile se permite el salto natural. */
+    .hero-title span.hero-title-line1 {
+      font-family: inherit;
+      font-style: normal;
+      font-weight: 700;
+      color: inherit;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 768px) {
+      .hero-title span.hero-title-line1 {
+        white-space: normal;
+      }
+    }
+
     .hero-description {
       color: #aaaaaa;
       text-align: center;
@@ -590,7 +606,7 @@
 
     <!-- Main Headings -->
     <h1 class="hero-title">
-      Tan simple como enviar un<span> link</span>.<br>
+      <span class="hero-title-line1">Tan simple como enviar un<span> link</span>.</span><br>
       Tan efectivo como un gogó.
     </h1>
 
