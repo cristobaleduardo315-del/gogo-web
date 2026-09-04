@@ -966,7 +966,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 360px;
+    min-height: 280px;
     border: 1px solid rgba(0, 0, 0, 0.04);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -1001,6 +1001,36 @@
     width: 22px;
     height: 22px;
     stroke-width: 2;
+  }
+
+  /* Número + Etiqueta (reemplaza al ícono en el bloque "Qué obtienes") */
+  .card-number-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .card-number {
+    width: 48px;
+    height: 48px;
+    background: #f4f4f2;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0b0b0b;
+    flex-shrink: 0;
+  }
+
+  .card-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: #999999;
   }
 
   .card-title {
@@ -1057,6 +1087,15 @@
   .card-item.featured .card-icon {
     background: rgba(255, 255, 255, 0.1);
     color: #ccff00;
+  }
+
+  .card-item.featured .card-number {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ccff00;
+  }
+
+  .card-item.featured .card-label {
+    color: rgba(255, 255, 255, 0.6);
   }
 
   .card-item.featured .card-title {
@@ -1144,6 +1183,22 @@
       height: 18px;
     }
 
+    .card-number-row {
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .card-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    .card-label {
+      font-size: 11px;
+    }
+
     .card-title {
       font-size: 15px;
       margin-bottom: 8px;
@@ -1190,61 +1245,53 @@
 
     <!-- Grilla de Tarjetas (4 en fila en PC / 2x2 en Móvil) -->
     <div class="problema-grid">
-      
+
       <!-- Tarjeta 1 (Blanca) -->
       <div class="card-item">
         <div class="card-top">
-          <div class="card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-            </svg>
+          <div class="card-number-row">
+            <span class="card-number">01</span>
+            <span class="card-label">Muestra</span>
           </div>
-          <h3 class="card-title">Menús que se rompen o pierden</h3>
-          <p class="card-text">El papel se moja, se dobla o se acaba justo cuando más lo necesitas.</p>
+          <h3 class="card-title">Todo tu negocio en un solo lugar.</h3>
+          <p class="card-text">Productos, servicios, platos, fotografías, precios, horarios y ubicaciones.</p>
         </div>
-        <a href="#contacto" class="card-link">Saber más <span>→</span></a>
       </div>
 
       <!-- Tarjeta 2 (Blanca) -->
       <div class="card-item">
         <div class="card-top">
-          <div class="card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+          <div class="card-number-row">
+            <span class="card-number">02</span>
+            <span class="card-label">Comparte</span>
           </div>
-          <h3 class="card-title">Precios desactualizados</h3>
-          <p class="card-text">Cambiar un precio significa reimprimir papel o volver a mandar archivos.</p>
+          <h3 class="card-title">Un link. Un QR. Listo.</h3>
+          <p class="card-text">Instagram, WhatsApp, Google, mesas, empaques o donde quieras.</p>
         </div>
-        <a href="#contacto" class="card-link">Saber más <span>→</span></a>
       </div>
 
       <!-- Tarjeta 3 (Blanca) -->
       <div class="card-item">
         <div class="card-top">
-          <div class="card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-            </svg>
+          <div class="card-number-row">
+            <span class="card-number">03</span>
+            <span class="card-label">Actualiza</span>
           </div>
-          <h3 class="card-title">Clientes confundidos</h3>
-          <p class="card-text">Sin horarios o dirección clara, se van a comprar a otro lado.</p>
+          <h3 class="card-title">Cambia lo que necesites al instante.</h3>
+          <p class="card-text">Precios, productos, fotografías, promociones o disponibilidad.</p>
         </div>
-        <a href="#contacto" class="card-link">Saber más <span>→</span></a>
       </div>
 
       <!-- Tarjeta 4 (Destacada en Negro + Verde) -->
       <div class="card-item featured">
         <div class="card-top">
-          <div class="card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-            </svg>
+          <div class="card-number-row">
+            <span class="card-number">04</span>
+            <span class="card-label">Fideliza</span>
           </div>
-          <h3 class="card-title">Cero presencia digital</h3>
-          <p class="card-text">Sin enlace propio profesional pierdes ventas frente a tu competencia.</p>
+          <h3 class="card-title">Haz que tus clientes tengan una razón para volver.</h3>
+          <p class="card-text">Puntos, sellos, recompensas e información sobre tus clientes.</p>
         </div>
-        <a href="#contacto" class="card-link">Ver solución <span>→</span></a>
       </div>
 
     </div>
