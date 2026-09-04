@@ -324,10 +324,9 @@
       border: none;
       cursor: pointer;
       box-shadow: 0 0 20px rgba(204, 255, 0, 0.3);
-      transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), 
-                  box-shadow 0.3s ease, 
+      transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+                  box-shadow 0.3s ease,
                   background-color 0.2s ease;
-      margin-bottom: 48px;
       z-index: 10;
     }
 
@@ -339,6 +338,54 @@
 
     .btn-main-cta:active {
       transform: translateY(0) scale(0.98);
+    }
+
+    /* Grupo de CTAs del Hero (principal + secundario) */
+    .hero-cta-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 20px;
+      z-index: 10;
+    }
+
+    /* Botón Secundario */
+    .btn-secondary-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: transparent;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 14px 32px;
+      border-radius: 30px;
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      cursor: pointer;
+      transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+                  border-color 0.2s ease,
+                  background-color 0.2s ease;
+    }
+
+    .btn-secondary-cta:hover {
+      transform: translateY(-3px) scale(1.03);
+      border-color: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-secondary-cta:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    /* Microcopy de confianza debajo de los CTAs */
+    .hero-trust-microcopy {
+      color: #888888;
+      font-size: 13px;
+      text-align: center;
+      margin-bottom: 48px;
     }
 
     /* Interactive Cards Container */
@@ -514,6 +561,16 @@
         max-width: 280px;
       }
 
+      .hero-cta-group {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .btn-secondary-cta {
+        width: 100%;
+        max-width: 280px;
+      }
+
       .cards-wrapper {
         height: auto;
         display: flex;
@@ -606,19 +663,27 @@
 
     <!-- Main Headings -->
     <h1 class="hero-title">
-      <span class="hero-title-line1">Tan simple como enviar un<span> link</span>.</span><br>
-      Tan efectivo como un gogó.
+      Muestra lo que vendes.<br>
+      Haz que <span>vuelvan</span>.
     </h1>
 
     <!-- Subtitle -->
     <p class="hero-description">
-      La presencia digital rápida que tu marca necesita. Muestra tu catálogo, menú o servicios en una página ligera diseñada para convertir clics en clientes.
+      Crea tu menú, catálogo o portafolio digital, compártelo con un link o QR y empieza a conocer y fidelizar a tus clientes.
     </p>
 
-    <!-- Main CTA Button -->
-    <a href="#planes" class="btn-main-cta" onclick="irAPlanes(event)">
-      ¿Cómo funciona?
-    </a>
+    <!-- Hero CTAs -->
+    <div class="hero-cta-group">
+      <a href="#planes" class="btn-main-cta" onclick="irAPlanes(event)">
+        Crear mi GoGo
+      </a>
+      <a href="#como-funciona" class="btn-secondary-cta">
+        Ver cómo funciona
+      </a>
+    </div>
+
+    <!-- Trust Microcopy -->
+    <p class="hero-trust-microcopy">14 días gratis · Sin tarjeta · Listo en minutos</p>
 
     <!-- Interactive Fan Cards Container -->
     <div class="cards-wrapper" id="cardsWrapper">
