@@ -2,12 +2,16 @@ import { hashPassword, createSession, sessionCookie } from "./lib/auth.js";
 import { renderAuthPage, escapeHtml } from "./lib/layout.js";
 import { provisionLealtadMerchant, verifyLealtadCredentials } from "./lib/internalApi.js";
 
-const VALID_PLANS = ["start", "plus", "pro"];
+// "demo" es una cuenta de prueba muy limitada (ver functions/lib/planLimits.js):
+// a diferencia de start/plus/pro, nunca provisiona una cuenta de fidelización
+// en gogo-lealtad (ver onRequestPost más abajo).
+const VALID_PLANS = ["start", "plus", "pro", "demo"];
 
 function registerPage({ error, values = {} } = {}) {
+  const isDemo = values.plan === "demo";
   const body = `
-    <h1>Crea tu cuenta</h1>
-    <p class="sub">Un solo acceso para tu página, tu plan y tu programa de fidelización.</p>
+    <h1>${isDemo ? "Crea tu cuenta demo" : "Crea tu cuenta"}</h1>
+    <p class="sub">${isDemo ? "Prueba el panel de GoGo gratis, sin tarjeta -- con menú digital limitado y sin fidelización." : "Un solo acceso para tu página, tu plan y tu programa de fidelización."}</p>
     ${error ? `<div class="error">${escapeHtml(error)}</div>` : ""}
     <form method="POST" action="/registro${values.plan ? `?plan=${escapeHtml(values.plan)}` : ""}">
       <label>Nombre de tu negocio</label>
@@ -80,6 +84,14 @@ export async function onRequestPost({ request, env }) {
         registerPage({ error: "Ya existe una cuenta con ese correo. Inicia sesión.", values: { business_name: businessName, email, plan } }),
         400
       );
+    }
+
+    // Cuenta demo: no se provisiona fidelización en gogo-lealtad (por eso
+    // fidelizacion.js la muestra bloqueada con un mensaje para activar un
+    // plan), ni se ofrece vincular una cuenta de fidelización existente --
+    // la demo es para negocios nuevos que apenas están probando.
+    if (plan === "demo") {
+      return createWebMerchant(env, { businessName, email, password, plan, lealtadMerchantId: null });
     }
 
     const { ok, status, data } = await provisionLealtadMerchant(env, { businessName, email });
