@@ -31,7 +31,7 @@ const NAV_ICONS = {
   configuracion: `<line x1="4" y1="7" x2="20" y2="7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="7" r="2.1" fill="currentColor"/><line x1="4" y1="14" x2="20" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="14" r="2.1" fill="currentColor"/><line x1="4" y1="19" x2="20" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="19" r="2.1" fill="currentColor"/>`,
 };
 
-const PLAN_LABELS = { start: "Plan Start", plus: "Plan Plus", pro: "Plan Pro" };
+const PLAN_LABELS = { start: "Plan Start", plus: "Plan Plus", pro: "Plan Pro", demo: "Modo demo" };
 
 const SHELL_STYLES = `
   :root{
@@ -289,6 +289,7 @@ export function renderShell({ title, active, merchant, bodyHtml }) {
 
   const planLabel = PLAN_LABELS[merchant.plan] || PLAN_LABELS.start;
   const showUpgrade = merchant.plan !== "pro";
+  const isDemo = merchant.plan === "demo";
 
   return `<!DOCTYPE html>
 <html lang="es">
@@ -322,8 +323,8 @@ export function renderShell({ title, active, merchant, bodyHtml }) {
       ${
         showUpgrade
           ? `<div class="upgrade-box">
-        <div class="t">Sube de plan</div>
-        <div class="s">Desbloquea más funciones para tu negocio.</div>
+        <div class="t">${isDemo ? "Estás en modo demo" : "Sube de plan"}</div>
+        <div class="s">${isDemo ? "Activa un plan para desbloquear fidelización y sin límites en tu menú." : "Desbloquea más funciones para tu negocio."}</div>
         <a class="upgrade-btn" href="/panel/mi-plan">Ver planes</a>
       </div>`
           : ""
