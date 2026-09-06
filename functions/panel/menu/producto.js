@@ -1,7 +1,8 @@
 import { requireMerchant } from "../../lib/auth.js";
 import { renderShell } from "../../lib/layout.js";
 import { productFormBody } from "../../lib/menuForm.js";
-import { listCategories, createProduct } from "../../lib/menuData.js";
+import { listCategories, listProducts, createProduct } from "../../lib/menuData.js";
+import { isDemoPlan, DEMO_MAX_PRODUCTS } from "../../lib/planLimits.js";
 
 function html(body, status = 200) {
   return new Response(body, { status, headers: { "Content-Type": "text/html; charset=utf-8" } });
@@ -15,6 +16,14 @@ export async function onRequestGet({ request, env }) {
   if (!categories.length) {
     const qs = "error=" + encodeURIComponent("Crea primero una categoría antes de agregar productos.");
     return new Response(null, { status: 302, headers: { Location: "/panel/menu?" + qs } });
+  }
+
+  if (isDemoPlan(merchant)) {
+    const existingProducts = await listProducts(env.DB, merchant.id);
+    if (existingProducts.length >= DEMO_MAX_PRODUCTS) {
+      const qs = "error=" + encodeURIComponent("La demo permite hasta " + DEMO_MAX_PRODUCTS + " productos. Activa un plan para agregar más.");
+      return new Response(null, { status: 302, headers: { Location: "/panel/menu?" + qs } });
+    }
   }
 
   const url = new URL(request.url);
@@ -36,6 +45,15 @@ export async function onRequestPost({ request, env }) {
 
   const categories = await listCategories(env.DB, merchant.id);
   const formData = await request.formData();
+
+  if (isDemoPlan(merchant)) {
+    const existingProducts = await listProducts(env.DB, merchant.id);
+    if (existingProducts.length >= DEMO_MAX_PRODUCTS) {
+      const qs = "error=" + encodeURIComponent("La demo permite hasta " + DEMO_MAX_PRODUCTS + " productos. Activa un plan para agregar más.");
+      return new Response(null, { status: 302, headers: { Location: "/panel/menu?" + qs } });
+    }
+  }
+
   const categoryId = String(formData.get("category_id") || "");
   const name = String(formData.get("name") || "").trim();
   const description = String(formData.get("description") || "").trim();
