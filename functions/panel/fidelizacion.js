@@ -10,6 +10,7 @@ import {
   updateLealtadLocation,
   sendLealtadPromotion,
 } from "../lib/internalApi.js";
+import { isDemoPlan } from "../lib/planLimits.js";
 
 function html(body, status = 200) {
   return new Response(body, { status, headers: { "Content-Type": "text/html; charset=utf-8" } });
@@ -330,7 +331,15 @@ export async function onRequestGet({ request, env }) {
   if (!merchant) return new Response(null, { status: 302, headers: { Location: "/login" } });
 
   if (!merchant.lealtad_merchant_id) {
-    const body = `
+    const body = isDemoPlan(merchant)
+      ? `
+      <div class="topbar"><div><h1>Fidelización</h1><p>Tu programa de sellos.</p></div></div>
+      <div class="card" style="max-width:560px;">
+        <h3 style="margin-top:0;">Esto es parte de los planes pagos</h3>
+        <p class="muted">Con fidelización, tus clientes juntan sellos digitales en Google Wallet y vuelven más seguido a tu negocio. Actívala eligiendo un plan.</p>
+        <a class="btn" href="/panel/mi-plan" style="display:inline-block;margin-top:6px;">Ver planes</a>
+      </div>`
+      : `
       <div class="topbar"><div><h1>Fidelización</h1><p>Tu programa de sellos.</p></div></div>
       <div class="card"><p class="muted">Tu cuenta todavía no tiene un programa de fidelización vinculado. Escríbenos para activarlo.</p></div>`;
     return html(renderShell({ title: "Fidelización", active: "fidelizacion", merchant, bodyHtml: body }));

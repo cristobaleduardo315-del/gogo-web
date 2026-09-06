@@ -12,6 +12,7 @@ function html(body, status = 200) {
 }
  
 function pageBody(merchant, { notice, pendingPlan } = {}) {
+  const isDemo = merchant.plan === "demo";
   const cards = PLANS.map((p) => {
     const isCurrent = p.key === merchant.plan;
     return `<div class="card${isCurrent ? " plan-card" : ""}" style="flex:1;">
@@ -27,10 +28,15 @@ function pageBody(merchant, { notice, pendingPlan } = {}) {
       }
     </div>`;
   }).join("");
- 
+
   return `
     <div class="topbar"><div><h1>Mi plan</h1><p>Tu plan actual y opciones para cambiarlo.</p></div></div>
     ${notice ? `<div class="notice">${escapeHtml(notice)}</div>` : ""}
+    ${
+      isDemo
+        ? `<div class="notice">Estás en la <strong>demo</strong>: fidelización está bloqueada y tu menú tiene un límite de categorías y productos. Elige un plan para desbloquear todo.</div>`
+        : ""
+    }
     ${
       pendingPlan
         ? `<div class="notice">Tienes una solicitud de cambio a <strong>${escapeHtml(pendingPlan)}</strong> pendiente de confirmación. Te contactaremos para completar el pago.</div>`
