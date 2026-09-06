@@ -193,11 +193,23 @@ const SHELL_STYLES = `
 
 const AUTH_STYLES = `
   *{box-sizing:border-box;margin:0;padding:0;}
+  html, body{height:100%;}
   body{
     font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background:#f4f4f2;color:#0b0b0b;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+    color:#0b0b0b;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+    position:relative;
+    background:#0b0b0b;
   }
-  .auth-card{background:#fff;border:1px solid #e6e6e1;border-radius:18px;padding:32px;width:100%;max-width:400px;box-shadow:0 1px 2px rgba(11,11,11,0.04), 0 1px 12px rgba(11,11,11,0.03);}
+  .bg-layer{
+    position:fixed;inset:0;z-index:0;
+    background-image:url('/assets/hero-bg-mountains.webp');
+    background-size:cover;background-position:center;background-repeat:no-repeat;
+  }
+  .bg-overlay{
+    position:fixed;inset:0;z-index:1;
+    background:linear-gradient(180deg, rgba(11,11,11,0.55) 0%, rgba(11,11,11,0.35) 45%, rgba(11,11,11,0.65) 100%);
+  }
+  .auth-card{position:relative;z-index:2;background:#fff;border:1px solid #e6e6e1;border-radius:18px;padding:32px;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,0.35), 0 1px 2px rgba(11,11,11,0.04);}
   .auth-card img{height:78px;display:block;margin-bottom:20px;}
   .auth-card h1{font-size:22px;font-weight:800;margin-bottom:6px;letter-spacing:-0.3px;}
   .auth-card p.sub{color:#6b6b6b;font-size:13.5px;margin-bottom:22px;}
@@ -220,6 +232,8 @@ export function renderAuthPage({ title, bodyHtml }) {
 <style>${AUTH_STYLES}</style>
 </head>
 <body>
+  <div class="bg-layer"></div>
+  <div class="bg-overlay"></div>
   <div class="auth-card">
     <img src="/assets/logo.webp" alt="gogo">
     ${bodyHtml}
