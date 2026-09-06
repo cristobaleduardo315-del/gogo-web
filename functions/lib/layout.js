@@ -204,22 +204,32 @@ const AUTH_STYLES = `
     position:fixed;inset:0;z-index:0;
     background-image:url('/assets/hero-bg-mountains.webp');
     background-size:cover;background-position:center;background-repeat:no-repeat;
+    transform:scale(1.2);
+    transition:transform 0.6s ease-out;
   }
   .bg-overlay{
     position:fixed;inset:0;z-index:1;
     background:linear-gradient(180deg, rgba(11,11,11,0.55) 0%, rgba(11,11,11,0.35) 45%, rgba(11,11,11,0.65) 100%);
   }
-  .auth-card{position:relative;z-index:2;background:#fff;border:1px solid #e6e6e1;border-radius:18px;padding:32px;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,0.35), 0 1px 2px rgba(11,11,11,0.04);}
+  .auth-card{
+    position:relative;z-index:2;width:100%;max-width:400px;padding:32px;border-radius:18px;
+    background:rgba(255,255,255,0.55);
+    border:1px solid rgba(255,255,255,0.4);
+    -webkit-backdrop-filter:blur(24px) saturate(140%);
+    backdrop-filter:blur(24px) saturate(140%);
+    box-shadow:0 8px 32px rgba(0,0,0,0.35);
+  }
   .auth-card img{height:78px;display:block;margin-bottom:20px;}
   .auth-card h1{font-size:22px;font-weight:800;margin-bottom:6px;letter-spacing:-0.3px;}
-  .auth-card p.sub{color:#6b6b6b;font-size:13.5px;margin-bottom:22px;}
-  .auth-card label{display:block;font-size:12.5px;font-weight:700;color:#6b6b6b;margin:14px 0 6px;}
+  .auth-card p.sub{color:#3f3f3d;font-size:13.5px;margin-bottom:22px;}
+  .auth-card label{display:block;font-size:12.5px;font-weight:700;color:#3f3f3d;margin:14px 0 6px;}
   .auth-card label:first-of-type{margin-top:0;}
-  .auth-card input{width:100%;padding:11px 12px;border:1px solid #e6e6e1;border-radius:10px;font-size:14px;font-family:inherit;}
+  .auth-card input{width:100%;padding:11px 12px;border:1px solid rgba(11,11,11,0.14);border-radius:10px;font-size:14px;font-family:inherit;background:rgba(255,255,255,0.6);color:#0b0b0b;}
+  .auth-card input::placeholder{color:#6b6b6b;}
   .auth-card button{width:100%;margin-top:20px;background:#ccff00;color:#000;font-weight:800;font-size:14px;padding:12px;border-radius:20px;border:none;cursor:pointer;}
-  .auth-card .error{background:#fdecec;color:#d9383d;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:700;margin-bottom:16px;}
-  .auth-card .foot{text-align:center;margin-top:18px;font-size:13px;color:#6b6b6b;}
-  .auth-card .foot a{color:#5c7a00;font-weight:700;text-decoration:none;}
+  .auth-card .error{background:rgba(253,236,236,0.85);color:#d9383d;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:700;margin-bottom:16px;}
+  .auth-card .foot{text-align:center;margin-top:18px;font-size:13px;color:#3f3f3d;}
+  .auth-card .foot a{color:#4a6300;font-weight:700;text-decoration:none;}
 `;
 
 export function renderAuthPage({ title, bodyHtml }) {
@@ -238,6 +248,29 @@ export function renderAuthPage({ title, bodyHtml }) {
     <img src="/assets/logo.webp" alt="gogo">
     ${bodyHtml}
   </div>
+  <script>
+    // Parallax/zoom del fondo de montañas siguiendo el cursor, igual mecanismo
+    // que el hero del sitio de marketing pero más marcado (zoom 1.2x y mayor
+    // desplazamiento) porque aquí el fondo ocupa toda la pantalla.
+    document.addEventListener('DOMContentLoaded', () => {
+      const bg = document.querySelector('.bg-layer');
+      if (bg && window.matchMedia("(hover: hover)").matches) {
+        const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+        document.addEventListener('mousemove', (e) => {
+          const cx = window.innerWidth / 2;
+          const cy = window.innerHeight / 2;
+          const dx = e.clientX - cx;
+          const dy = e.clientY - cy;
+          const translateX = clamp(dx * 0.05, -48, 48);
+          const translateY = clamp(dy * 0.05, -40, 40);
+          bg.style.transform = \`translate(\${translateX}px, \${translateY}px) scale(1.2)\`;
+        });
+        document.addEventListener('mouseleave', () => {
+          bg.style.transform = 'translate(0px, 0px) scale(1.2)';
+        });
+      }
+    });
+  </script>
 </body>
 </html>`;
 }
