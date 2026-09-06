@@ -775,6 +775,18 @@
     flex-direction: column;
     justify-content: space-between;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .stack-card-light:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+  }
+
+  .stack-card-light:hover .circle-arrow-btn {
+    transform: translateX(3px);
   }
 
   .stack-card-light p {
@@ -956,13 +968,13 @@
       <div class="dash-cards-column">
         
         <!-- Tarjeta Superior Blanca -->
-        <div class="stack-card-light">
+        <a href="/registro?plan=demo" class="stack-card-light">
           <p>¿Tienes dudas sobre cómo actualizar tu información?</p>
           <div class="stack-card-action">
             <span>Ver demo rápida</span>
             <div class="circle-arrow-btn">➔</div>
           </div>
-        </div>
+        </a>
 
         <!-- Tarjeta Inferior Verde Neón -->
         <a href="#planes" class="stack-card-green" onclick="irAPlanes(event)">
