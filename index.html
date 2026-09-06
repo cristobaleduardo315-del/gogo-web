@@ -360,44 +360,26 @@
       requestAnimationFrame(paso);
     }
 
-    // Efecto Tilt 3D del mockup del hero (imagen real de una página GoGo) +
-    // parallax/zoom de la imagen de fondo del hero. Mientras el cursor se mueva
-    // dentro del hero (solo en escritorio): el marco del mockup se inclina en 3D
-    // según su propio centro, y la imagen de fondo del hero se desplaza un 30%
-    // hacia el cursor y se amplía un 30% (recortada limpiamente por el hero).
+    // Parallax/zoom MUY sutil de la imagen de fondo del hero, siguiendo el
+    // cursor (solo en escritorio). El mockup del hero se mantiene estático,
+    // sin ningún efecto de tilt ni movimiento.
     document.addEventListener('DOMContentLoaded', () => {
-      const frame = document.getElementById('dashboardFrame');
-      const container = document.getElementById('dashboardContainer');
       const hero = document.querySelector('.hero-section');
       const heroBg = document.querySelector('.image-background-wrapper');
-      if (frame && container && hero && window.matchMedia("(hover: hover)").matches) {
+      if (hero && heroBg && window.matchMedia("(hover: hover)").matches) {
         const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
         hero.addEventListener('mousemove', (e) => {
-          const rect = container.getBoundingClientRect();
-          const containerCenterX = rect.left + rect.width / 2;
-          const containerCenterY = rect.top + rect.height / 2;
-          const rotateX = ((e.clientY - containerCenterY) / 80) * -1;
-          const rotateY = (e.clientX - containerCenterX) / 100;
-          if (Math.abs(rotateX) < 10 && Math.abs(rotateY) < 10) {
-            frame.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-          } else {
-            frame.style.transform = 'rotateX(0deg) rotateY(0deg)';
-          }
-
-          if (heroBg) {
-            const heroRect = hero.getBoundingClientRect();
-            const heroCenterX = heroRect.left + heroRect.width / 2;
-            const heroCenterY = heroRect.top + heroRect.height / 2;
-            const bgDx = e.clientX - heroCenterX;
-            const bgDy = e.clientY - heroCenterY;
-            const bgTranslateX = clamp(bgDx * 0.02, -10, 10);
-            const bgTranslateY = clamp(bgDy * 0.02, -8, 8);
-            heroBg.style.transform = `translate(${bgTranslateX}px, ${bgTranslateY}px) scale(1.02)`;
-          }
+          const heroRect = hero.getBoundingClientRect();
+          const heroCenterX = heroRect.left + heroRect.width / 2;
+          const heroCenterY = heroRect.top + heroRect.height / 2;
+          const bgDx = e.clientX - heroCenterX;
+          const bgDy = e.clientY - heroCenterY;
+          const bgTranslateX = clamp(bgDx * 0.02, -10, 10);
+          const bgTranslateY = clamp(bgDy * 0.02, -8, 8);
+          heroBg.style.transform = `translate(${bgTranslateX}px, ${bgTranslateY}px) scale(1.02)`;
         });
         hero.addEventListener('mouseleave', () => {
-          frame.style.transform = 'rotateX(0deg) rotateY(0deg)';
-          if (heroBg) heroBg.style.transform = 'translate(0px, 0px) scale(1)';
+          heroBg.style.transform = 'translate(0px, 0px) scale(1)';
         });
       }
     });
