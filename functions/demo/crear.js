@@ -26,6 +26,26 @@ function validImage(v) {
   return s;
 }
 
+// El wizard solo pide el "@" de Instagram/TikTok (no la URL completa). Acá
+// se limpia lo que llegue (por si alguien pega igual una URL completa o el
+// "@" con espacios) y se arma la URL final, que es lo que espera el resto
+// del producto (menu_pages.instagram_url/tiktok_url ya son URLs completas,
+// ver functions/lib/menuHomeRender.js).
+function extractHandle(raw, max = 30) {
+  let s = String(raw || "").trim();
+  if (!s) return "";
+  s = s.replace(/^https?:\/\/(www\.)?(instagram\.com|tiktok\.com)\/@?/i, "");
+  s = s.replace(/^@+/, "");
+  s = s.split(/[/?#\s]/)[0];
+  s = s.replace(/[^a-zA-Z0-9._]/g, "");
+  return s.slice(0, max);
+}
+
+function validHexColor(v) {
+  const s = String(v || "").trim();
+  return /^#[0-9a-fA-F]{6}$/.test(s) ? s.toLowerCase() : null;
+}
+
 export async function onRequestPost({ request, env }) {
   let body;
   try {
@@ -38,9 +58,12 @@ export async function onRequestPost({ request, env }) {
   const businessName = cleanText(body.businessName, 120);
   const whatsappPhone = cleanText(body.whatsappPhone, 30).replace(/[^0-9]/g, "");
   const email = cleanText(body.email, 160);
-  const instagramUrl = cleanText(body.instagramUrl, 300);
-  const tiktokUrl = cleanText(body.tiktokUrl, 300);
+  const instagramHandle = extractHandle(body.instagramHandle);
+  const tiktokHandle = extractHandle(body.tiktokHandle);
+  const instagramUrl = instagramHandle ? `https://instagram.com/${instagramHandle}` : null;
+  const tiktokUrl = tiktokHandle ? `https://www.tiktok.com/@${tiktokHandle}` : null;
   const logoUrl = validImage(body.logoUrl);
+  const accentColor = validHexColor(body.accentColor);
 
   if (!businessName) return json({ error: "Falta el nombre del negocio." }, 400);
   if (!whatsappPhone && !email) return json({ error: "Danos tu WhatsApp o tu correo." }, 400);
@@ -71,9 +94,10 @@ export async function onRequestPost({ request, env }) {
       businessName,
       whatsappPhone: whatsappPhone || null,
       email: email || null,
-      instagramUrl: instagramUrl || null,
-      tiktokUrl: tiktokUrl || null,
+      instagramUrl,
+      tiktokUrl,
       logoUrl,
+      accentColor,
       categories,
       products,
     });
