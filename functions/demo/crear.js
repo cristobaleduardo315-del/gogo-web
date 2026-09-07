@@ -64,6 +64,7 @@ export async function onRequestPost({ request, env }) {
   const tiktokUrl = tiktokHandle ? `https://www.tiktok.com/@${tiktokHandle}` : null;
   const logoUrl = validImage(body.logoUrl);
   const accentColor = validHexColor(body.accentColor);
+  const displayMode = body.displayMode === "vertical" ? "vertical" : "grid4";
 
   if (!businessName) return json({ error: "Falta el nombre del negocio." }, 400);
   if (!whatsappPhone && !email) return json({ error: "Danos tu WhatsApp o tu correo." }, 400);
@@ -98,6 +99,7 @@ export async function onRequestPost({ request, env }) {
       tiktokUrl,
       logoUrl,
       accentColor,
+      displayMode,
       categories,
       products,
     });
