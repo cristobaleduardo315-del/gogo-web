@@ -5,17 +5,23 @@
 
 import { slugify } from "./menuData.js";
 
+// Color de marca por defecto según el tipo de negocio, cuando el lead no
+// eligió uno propio en el wizard (paso "Personaliza el color").
+export function defaultAccentColor(businessType) {
+  return businessType === "tienda" ? "#3d4eac" : "#c2410c";
+}
+
 export async function createLead(
   db,
-  { businessType, businessName, whatsappPhone, email, instagramUrl, tiktokUrl, logoUrl, categories, products }
+  { businessType, businessName, whatsappPhone, email, instagramUrl, tiktokUrl, logoUrl, accentColor, categories, products }
 ) {
   const leadId = crypto.randomUUID();
   const now = Date.now();
 
   await db
     .prepare(
-      `INSERT INTO demo_leads (id, business_type, business_name, whatsapp_phone, email, instagram_url, tiktok_url, logo_url, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO demo_leads (id, business_type, business_name, whatsapp_phone, email, instagram_url, tiktok_url, logo_url, accent_color, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       leadId,
@@ -26,6 +32,7 @@ export async function createLead(
       instagramUrl || null,
       tiktokUrl || null,
       logoUrl || null,
+      accentColor || null,
       now
     )
     .run();
@@ -84,12 +91,14 @@ export async function convertLeadToMerchant(db, leadId, merchantId) {
   const taken = await db.prepare("SELECT merchant_id FROM menu_pages WHERE slug = ?").bind(slug).first();
   if (taken) slug = `${slug}-${merchantId.slice(0, 4)}`;
 
+  const themeColor = lead.accent_color || defaultAccentColor(lead.business_type);
+
   await db
     .prepare(
-      `INSERT INTO menu_pages (merchant_id, slug, tagline, whatsapp_phone, instagram_url, tiktok_url, logo_url, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO menu_pages (merchant_id, slug, theme_color, tagline, whatsapp_phone, instagram_url, tiktok_url, logo_url, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
-    .bind(merchantId, slug, null, lead.whatsapp_phone, lead.instagram_url, lead.tiktok_url, lead.logo_url, Date.now())
+    .bind(merchantId, slug, themeColor, null, lead.whatsapp_phone, lead.instagram_url, lead.tiktok_url, lead.logo_url, Date.now())
     .run();
 
   const categoryIdMap = {};
