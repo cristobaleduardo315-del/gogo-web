@@ -13,15 +13,15 @@ export function defaultAccentColor(businessType) {
 
 export async function createLead(
   db,
-  { businessType, businessName, whatsappPhone, email, instagramUrl, tiktokUrl, logoUrl, accentColor, categories, products }
+  { businessType, businessName, whatsappPhone, email, instagramUrl, tiktokUrl, logoUrl, accentColor, displayMode, categories, products }
 ) {
   const leadId = crypto.randomUUID();
   const now = Date.now();
 
   await db
     .prepare(
-      `INSERT INTO demo_leads (id, business_type, business_name, whatsapp_phone, email, instagram_url, tiktok_url, logo_url, accent_color, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO demo_leads (id, business_type, business_name, whatsapp_phone, email, instagram_url, tiktok_url, logo_url, accent_color, display_mode, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       leadId,
@@ -33,6 +33,7 @@ export async function createLead(
       tiktokUrl || null,
       logoUrl || null,
       accentColor || null,
+      displayMode || "grid4",
       now
     )
     .run();
