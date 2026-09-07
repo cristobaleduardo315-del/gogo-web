@@ -44,6 +44,13 @@ const WIZARD_STYLES = `
     color:#0b0b0b;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
     position:relative;background:#0b0b0b;
   }
+  /* Si el paso del wizard (ej. varios productos) es más alto que la
+     pantalla, el centrado normal de flexbox recorta la parte de arriba y
+     la deja inalcanzable con scroll. "safe center" hace que el navegador
+     alinee arriba (y deje hacer scroll) en vez de centrar cuando no cabe.
+     Se declara aparte para que los navegadores viejos que no soportan
+     "safe" simplemente se queden con el "center" de arriba. */
+  body{align-items:safe center;}
   .bg-layer{
     position:fixed;inset:0;z-index:0;
     background-image:url('/assets/hero-bg-mountains.webp');

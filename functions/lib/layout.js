@@ -200,6 +200,13 @@ const AUTH_STYLES = `
     position:relative;
     background:#0b0b0b;
   }
+  /* Si el contenido (ej. un formulario con error + campos) es más alto
+     que la pantalla, el centrado normal de flexbox recorta la parte de
+     arriba y la deja inalcanzable con scroll. "safe center" hace que el
+     navegador alinee arriba (y deje hacer scroll) en vez de centrar
+     cuando no cabe. Se declara aparte para que los navegadores viejos que
+     no soportan "safe" se queden con el "center" de arriba. */
+  body{align-items:safe center;}
   .bg-layer{
     position:fixed;inset:0;z-index:0;
     background-image:url('/assets/hero-bg-mountains.webp');
