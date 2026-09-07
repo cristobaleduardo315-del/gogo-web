@@ -4,7 +4,7 @@
 // justo después de terminar el wizard, con un CTA para activarlo de verdad.
 
 import { getLead } from "../../lib/demoData.js";
-import { renderDemoPreview } from "../../lib/demoRender.js";
+import { renderDemoHome } from "../../lib/demoRender.js";
 
 function html(body, status = 200) {
   return new Response(body, { status, headers: { "Content-Type": "text/html; charset=utf-8" } });
@@ -32,5 +32,6 @@ export async function onRequestGet({ params, env }) {
   }
 
   const activateUrl = `/registro?plan=start&demo=${encodeURIComponent(data.lead.id)}`;
-  return html(renderDemoPreview(data, activateUrl));
+  const productsUrl = `/demo/vista/${encodeURIComponent(data.lead.id)}/productos`;
+  return html(renderDemoHome(data, { activateUrl, productsUrl }));
 }
