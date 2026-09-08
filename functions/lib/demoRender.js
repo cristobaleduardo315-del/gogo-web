@@ -116,6 +116,9 @@ const WIZARD_STYLES = `
   .wz-spinner{width:34px;height:34px;border-radius:50%;border:3px solid rgba(255,255,255,0.3);border-top-color:#ccff00;animation:wzspin 0.8s linear infinite;margin:0 auto 16px;}
   @keyframes wzspin{to{transform:rotate(360deg);}}
 
+  .wz-demo-toast{background:rgba(204,255,0,0.92);color:#0b0b0b;border-radius:10px;padding:11px 13px;font-size:13px;font-weight:600;margin-bottom:14px;display:none;text-align:center;line-height:1.4;}
+  .wz-demo-toast.show{display:block;}
+
   @media (max-width:480px){
     body{padding:14px;}
     .wz-card{padding:22px 18px;border-radius:16px;}
@@ -140,7 +143,7 @@ export function renderDemoWizard() {
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-gidth, initial-scale=1.0">
 <title>Prueba GoGo gratis — arma tu menú en minutos</title>
 <meta name="description" content="Arma en minutos una vista previa de tu menú o catálogo digital, gratis y sin crear una cuenta.">
 <style>${WIZARD_STYLES}</style>
@@ -184,7 +187,15 @@ export function renderDemoWizard() {
         <div class="wz-step" data-step="3">
           <h2>${STEP_TITLES[3].title}</h2>
           <p class="sub">${STEP_TITLES[3].sub}</p>
+          <div class="wz-field" style="margin-bottom:18px;">
+            <label>¿Cómo quieres ver tus productos?</label>
+            <div class="wz-type-grid" id="wzDisplayMode">
+              <div class="wz-type-card wz-dm-card selected" data-mode="grid4"><strong>Agrupación de a 4</strong><span style="font-size:11px;color:#3f3f3d;margin-top:4px;display:block;">Cuadrícula compacta</span></div>
+              <div class="wz-type-card wz-dm-card" data-mode="vertical"><strong>Modo vertical</strong><span style="font-size:11px;color:#3f3f3d;margin-top:4px;display:block;">Lista de arriba a abajo</span></div>
+            </div>
+          </div>
           <div id="wzProducts"></div>
+          <div class="wz-demo-toast" id="wzDemoToast">Esto es versión DEMO — si quieres las otras funciones accede a la suscripción.</div>
           <button type="button" class="wz-add-product" id="wzAddProduct">+ Agregar otro producto</button>
         </div>
 
@@ -194,7 +205,7 @@ export function renderDemoWizard() {
           <div class="wz-field">
             <label>Logo (PNG o JPG)</label>
             <div class="wz-photo-row">
-              <img class="wz-photo-preview" id="logoPreview" alt="">
+              <img class="wz-photo-preview" id="logoPreview" alt="" style="background:${DEFAULT_COLORS.restaurante}">
               <input type="file" accept="image/png,image/jpeg,image/webp" id="fLogo">
             </div>
           </div>
@@ -217,7 +228,7 @@ export function renderDemoWizard() {
           <p class="sub">${STEP_TITLES[6].sub}</p>
           <div class="wz-field"><label>WhatsApp (con indicativo, ej. 57...)</label><input type="tel" id="fWhatsapp" placeholder="573001234567"></div>
           <div class="wz-field"><label>Correo (opcional si ya diste tu WhatsApp)</label><input type="email" id="fEmail" placeholder="tucorreo@ejemplo.com"></div>
-          <div class="wz-field"><label>Instagram (opcional)</label><input type="text" id="fInstagram" placeholder="@tunegocio"></div>
+          <div class="wz-field"><label>Instagram (opcional)</label><input type="text" id="fInstagram" placeholder="tunegocio"></div>
           <div class="wz-field"><label>TikTok (opcional)</label><input type="text" id="fTiktok" placeholder="@tunegocio"></div>
           <div class="wz-field hint">Necesitamos al menos tu WhatsApp o tu correo para poder avisarte cuando actives tu página de verdad.</div>
         </div>
@@ -240,7 +251,7 @@ export function renderDemoWizard() {
   var TOTAL_STEPS = 7;
   var MAX_PRODUCTS = 5;
   var current = 0;
-  var state = { businessType: '', products: [], logoDataUrl: '' };
+  var state = { businessType: '', products: [], logoDataUrl: '', displayMode: 'grid4' };
   var colorTouched = false;
   var DEFAULT_COLORS = ${JSON.stringify(DEFAULT_COLORS)};
 
@@ -277,9 +288,9 @@ export function renderDemoWizard() {
     clearError();
   }
 
-  document.querySelectorAll('.wz-type-card').forEach(function (card) {
+  document.querySelectorAll('.wz-type-card[data-type]').forEach(function (card) {
     card.addEventListener('click', function () {
-      document.querySelectorAll('.wz-type-card').forEach(function (c) { c.classList.remove('selected'); });
+      document.querySelectorAll('.wz-type-card[data-type]').forEach(function (c) { c.classList.remove('selected'); });
       card.classList.add('selected');
       state.businessType = card.dataset.type;
       var catSub = document.getElementById('catSub');
@@ -289,15 +300,29 @@ export function renderDemoWizard() {
       if (!colorTouched) {
         setColor(DEFAULT_COLORS[state.businessType] || DEFAULT_COLORS.restaurante);
       }
+      current++;
+      renderStep();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  // ---- Modo de visualización de productos ----
+  document.querySelectorAll('.wz-dm-card').forEach(function (card) {
+    card.addEventListener('click', function () {
+      document.querySelectorAll('.wz-dm-card').forEach(function (c) { c.classList.remove('selected'); });
+      card.classList.add('selected');
+      state.displayMode = card.dataset.mode;
     });
   });
 
   // ---- Color de marca ----
+  var logoPreviewEl = document.getElementById('logoPreview');
   function setColor(hex) {
     colorInput.value = hex;
     document.querySelectorAll('.wz-swatch').forEach(function (sw) {
       sw.classList.toggle('selected', sw.dataset.color.toLowerCase() === hex.toLowerCase());
     });
+    logoPreviewEl.style.background = hex;
   }
   document.querySelectorAll('.wz-swatch').forEach(function (sw) {
     sw.addEventListener('click', function () {
@@ -348,7 +373,11 @@ export function renderDemoWizard() {
   addProductBlock();
   addProductBlock();
   addProductBlock();
-  addProductBtn.addEventListener('click', addProductBlock);
+  var demoToast = document.getElementById('wzDemoToast');
+  addProductBtn.addEventListener('click', function () {
+    addProductBlock();
+    demoToast.classList.add('show');
+  });
 
   function refreshCategorySelects() {
     var html = categoryOptionsHtml();
@@ -449,6 +478,7 @@ export function renderDemoWizard() {
       products: products,
       logoUrl: document.getElementById('fLogo').dataset.dataUrl || '',
       accentColor: colorInput.value,
+      displayMode: state.displayMode,
       whatsappPhone: document.getElementById('fWhatsapp').value.trim(),
       email: document.getElementById('fEmail').value.trim(),
       instagramHandle: document.getElementById('fInstagram').value.trim(),
@@ -626,6 +656,7 @@ ${bannerStyles(v)}
 export function renderDemoProducts({ lead, categories, products }, { activateUrl, backUrl }) {
   const label = BUSINESS_LABELS[lead.business_type] || BUSINESS_LABELS.restaurante;
   const v = demoThemeVars(lead.accent_color);
+  const isVertical = lead.display_mode === "vertical";
   const byCategory = categories.map((cat) => ({
     ...cat,
     items: products.filter((p) => p.category_id === cat.id),
@@ -634,7 +665,26 @@ export function renderDemoProducts({ lead, categories, products }, { activateUrl
   const productsHtml = byCategory
     .filter((c) => c.items.length)
     .map(
-      (cat) => `
+      (cat) => isVertical
+        ? `
+      <div class="dp-cat">
+        <h3>${escapeHtml(cat.name)}</h3>
+        <div class="dp-list">
+          ${cat.items
+            .map(
+              (p) => `
+            <div class="dp-list-item">
+              ${p.image_url ? `<img src="${escapeHtml(p.image_url)}" alt="${escapeHtml(p.name)}">` : `<div class="dp-list-noimg"></div>`}
+              <div class="dp-list-body">
+                <div class="dp-item-top"><strong>${escapeHtml(p.name)}</strong><span>${formatCOP(p.price)}</span></div>
+                ${p.description ? `<p>${escapeHtml(p.description)}</p>` : ""}
+              </div>
+            </div>`
+            )
+            .join("")}
+        </div>
+      </div>`
+        : `
       <div class="dp-cat">
         <h3>${escapeHtml(cat.name)}</h3>
         <div class="dp-grid">
@@ -681,9 +731,15 @@ ${bannerStyles(v)}
   .dp-item-top strong{font-size:14px;}
   .dp-item-top span{font-size:13px;font-weight:700;color:${v.themeDark};white-space:nowrap;}
   .dp-item p{font-size:12.5px;color:#666;line-height:1.4;}
+  /* Modo vertical (lista) */
+  .dp-list{display:flex;flex-direction:column;gap:12px;}
+  .dp-list-item{display:flex;gap:14px;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.06);padding:12px;}
+  .dp-list-item img,.dp-list-noimg{width:90px;height:90px;border-radius:10px;object-fit:cover;background:${v.cream};flex-shrink:0;}
+  .dp-list-body{flex:1;min-width:0;}
   @media (max-width:480px){
     .dp-grid{grid-template-columns:1fr 1fr;gap:10px;}
     .dp-item img,.dp-noimg{height:110px;}
+    .dp-list-item img,.dp-list-noimg{width:72px;height:72px;}
   }
   @media (max-width:360px){
     .dp-grid{grid-template-columns:1fr;}
