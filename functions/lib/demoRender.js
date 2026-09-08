@@ -99,6 +99,7 @@ const WIZARD_STYLES = `
   .wz-add-product{background:none;border:1px dashed rgba(11,11,11,0.25);border-radius:10px;padding:10px;width:100%;font-size:13px;font-weight:700;color:#3f3f3d;cursor:pointer;}
   .wz-photo-row{display:flex;align-items:center;gap:12px;margin-top:4px;flex-wrap:wrap;}
   .wz-photo-preview{width:52px;height:52px;border-radius:10px;object-fit:cover;background:rgba(11,11,11,0.08);flex-shrink:0;}
+#logoPreview{object-fit:contain;padding:8px;width:80px;height:80px;}
   .wz-color-row{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
   .wz-color-row input[type=color]{width:56px;height:44px;border:1px solid rgba(11,11,11,0.14);border-radius:10px;padding:2px;background:rgba(255,255,255,0.6);cursor:pointer;}
   .wz-swatches{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
@@ -229,7 +230,7 @@ export function renderDemoWizard() {
           <div class="wz-field"><label>WhatsApp (con indicativo, ej. 57...)</label><input type="tel" id="fWhatsapp" placeholder="573001234567"></div>
           <div class="wz-field"><label>Correo (opcional si ya diste tu WhatsApp)</label><input type="email" id="fEmail" placeholder="tucorreo@ejemplo.com"></div>
           <div class="wz-field"><label>Instagram (opcional)</label><input type="text" id="fInstagram" placeholder="tunegocio"></div>
-          <div class="wz-field"><label>TikTok (opcional)</label><input type="text" id="fTiktok" placeholder="@tunegocio"></div>
+          <div class="wz-field"><label>TikTok (opcional)</label><input type="text" id="fTiktok" placeholder="tunegocio"></div>
           <div class="wz-field hint">Necesitamos al menos tu WhatsApp o tu correo para poder avisarte cuando actives tu página de verdad.</div>
         </div>
       </form>
@@ -375,8 +376,8 @@ export function renderDemoWizard() {
   addProductBlock();
   var demoToast = document.getElementById('wzDemoToast');
   addProductBtn.addEventListener('click', function () {
-    addProductBlock();
     demoToast.classList.add('show');
+    addProductBtn.style.display = 'none';
   });
 
   function refreshCategorySelects() {
