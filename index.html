@@ -60,9 +60,10 @@
     }
 
     @media (max-width: 640px) {
+      /* En mobile, Cristobal pidió quitar el marco tipo "app frame" del
+         home — se oculta del todo en vez de solo achicarlo. */
       .page-frame {
-        border-width: 6px;
-        border-radius: 22px;
+        display: none;
       }
     }
   </style>
