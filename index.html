@@ -1137,7 +1137,18 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
     gap: 14px;
+    overflow: hidden;
+  }
+
+  .preview-real-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 12px;
+    display: block;
   }
 
   .mock-header-dots {
@@ -1363,17 +1374,8 @@
 
       <!-- Columna 2: Preview UI Central -->
       <div class="dash-preview-column">
-        <div class="preview-mock-ui">
-          <div class="mock-header-dots">
-            <div class="mock-dot"></div>
-            <div class="mock-dot"></div>
-            <div class="mock-dot"></div>
-          </div>
-          <div class="mock-content-body">
-            <div class="mock-bar accent"></div>
-            <div class="mock-bar" style="width: 85%;"></div>
-            <div class="mock-bar" style="width: 50%;"></div>
-          </div>
+        <div class="preview-mock-ui" id="dashPreviewMock">
+          <img src="assets/Imagen.png" alt="Vista previa de la página personalizada de GoGo" class="preview-real-image" id="dashPreviewImage">
         </div>
       </div>
 
