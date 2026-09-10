@@ -419,56 +419,68 @@
       text-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
     }
     .bento-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(2, 1fr);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
       gap: 24px;
-      max-width: 1100px;
+      max-width: 1133px;
       margin: 0 auto;
     }
     .bento-card {
-      border-radius: 32px; padding: 40px; display: flex;
+      border-radius: 32px; padding: 28px; display: flex;
       flex-direction: column; position: relative; overflow: hidden;
       transition: transform 0.3s ease;
+      box-sizing: border-box;
     }
     .bento-card:hover { transform: translateY(-4px); }
-    .card-tall { grid-column: 1 / 2; grid-row: 1 / 3; }
-    .card-wide { grid-column: 2 / 4; grid-row: 1 / 2; display: flex; flex-direction: column; }
-    .card-half-left { grid-column: 2 / 3; grid-row: 2 / 3; display: flex; flex-direction: column; }
-    .card-half-right { grid-column: 3 / 4; grid-row: 2 / 3; display: flex; flex-direction: column; }
+    .card-square { width: 335px; height: 445px; flex: none; }
+    .bento-col-stack { width: 415px; display: flex; flex-direction: column; gap: 24px; flex: none; }
+    .card-wideshort { width: 415px; height: 250px; flex: none; padding: 22px; }
     @media (max-width: 900px) {
-      .bento-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
-      .card-tall, .card-wide, .card-half-left, .card-half-right { grid-column: auto; grid-row: auto; }
+      .bento-grid { flex-direction: column; align-items: stretch; max-width: 460px; margin: 0 auto; }
+      .card-square { width: 100%; height: auto; min-height: 420px; }
+      .bento-col-stack { width: 100%; }
+      .card-wideshort { width: 100%; height: auto; }
     }
     .bento-green { background-color: #ccff00; color: #000000; }
     .bento-dark { background-color: #161912; border: 1px solid #28301f; color: #ffffff; }
     .card-content { position: relative; z-index: 2; max-width: 400px; }
-    .card-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.03em; line-height: 1.1; }
-    .card-desc { font-size: 0.95rem; line-height: 1.5; opacity: 0.8; font-weight: 500; }
+    .card-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.03em; line-height: 1.1; }
+    .card-desc { font-size: 0.82rem; line-height: 1.4; opacity: 0.8; font-weight: 500; }
+    .card-wideshort .card-title { font-size: 1.02rem; margin-bottom: 3px; }
+    .card-wideshort .card-desc { font-size: 0.68rem; line-height: 1.25; }
+    @media (max-width: 900px) {
+      .card-title { font-size: 1.45rem; margin-bottom: 10px; }
+      .card-desc { font-size: 0.9rem; line-height: 1.45; }
+      .card-wideshort .card-title { font-size: 1.3rem; margin-bottom: 10px; }
+      .card-wideshort .card-desc { font-size: 0.85rem; line-height: 1.4; }
+    }
     .mockup-tall {
       position: relative;
-      margin: 34px -34px 0 -8px;
-      padding-bottom: 24px;
+      margin: 16px -24px 0 -4px;
+      padding-bottom: 12px;
       flex: 1;
-      min-height: 300px;
+      min-height: 160px;
       display: flex;
       align-items: flex-start;
       justify-content: flex-end;
     }
     .mockup-phone-img {
-      width: 88%;
+      height: 235px;
+      width: auto;
       max-width: none;
       display: block;
-      filter: drop-shadow(0 26px 34px rgba(0, 0, 0, 0.25));
+      filter: drop-shadow(0 22px 28px rgba(0, 0, 0, 0.25));
     }
     .mockup-annotation {
       position: absolute;
-      left: 8px;
-      top: -22px;
-      max-width: 170px;
+      left: 4px;
+      top: -10px;
+      max-width: 150px;
       z-index: 3;
       font-family: 'Caveat', cursive;
-      font-size: 1.4rem;
+      font-size: 1.15rem;
       line-height: 1.1;
       font-weight: 700;
       color: #0b0b0b;
@@ -476,14 +488,16 @@
     }
     .mockup-annotation-arrow {
       display: block;
-      width: 42px;
+      width: 34px;
       height: auto;
-      margin: 4px 0 0 100px;
+      margin: 3px 0 0 80px;
       transform: rotate(6deg);
     }
     @media (max-width: 900px) {
-      .mockup-tall { margin: 40px -24px 0 -8px; padding-bottom: 20px; min-height: 260px; }
-      .mockup-phone-img { width: 82%; }
+      .mockup-tall { margin: 40px -24px 0 -8px; padding-bottom: 20px; min-height: 260px; flex: 1; }
+      .mockup-phone-img { height: auto; width: 82%; }
+      .mockup-annotation { left: 8px; top: -22px; max-width: 170px; font-size: 1.4rem; }
+      .mockup-annotation-arrow { width: 42px; margin: 4px 0 0 100px; }
     }
     .mockup-wide {
       flex: 1; width: 100%; height: 100%; min-height: 160px;
@@ -504,61 +518,62 @@
     .card-title .accent { color: #ccff00; }
     .share-row {
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       align-items: stretch;
-      gap: 20px;
-      margin-top: 20px;
-      height: 190px;
+      flex: 1;
+      gap: 4px;
+      margin-top: 12px;
+      height: auto;
     }
     .share-methods {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      flex: 0 0 auto;
-      width: 172px;
-      justify-content: center;
+      gap: 6px;
+      flex: none;
+      width: 100%;
     }
     .share-method {
       display: flex;
       align-items: center;
-      gap: 9px;
+      gap: 7px;
       background: #1f2418;
       border: 1px solid #2a3020;
       border-radius: 999px;
-      padding: 6px 12px 6px 6px;
+      padding: 5px 10px 5px 5px;
     }
     .share-method-icon {
-      width: 24px;
-      height: 24px;
-      border-radius: 7px;
+      width: 19px;
+      height: 19px;
+      border-radius: 6px;
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .share-method-icon svg { width: 14px; height: 14px; }
+    .share-method-icon svg { width: 11px; height: 11px; }
     .share-method-icon.icon-whatsapp { background: #25d366; }
-    .share-method-icon.icon-instagram { background: linear-gradient(135deg, #f9ce34, #ee2a7b, #6228d7); border-radius: 7px; }
+    .share-method-icon.icon-instagram { background: linear-gradient(135deg, #f9ce34, #ee2a7b, #6228d7); border-radius: 6px; }
     .share-method-icon.icon-link, .share-method-icon.icon-qr { background: transparent; width: auto; height: auto; }
-    .share-method-icon.icon-link svg, .share-method-icon.icon-qr svg { width: 17px; height: 17px; }
-    .share-method span.label { font-size: 0.68rem; font-weight: 600; }
+    .share-method-icon.icon-link svg, .share-method-icon.icon-qr svg { width: 14px; height: 14px; }
+    .share-method span.label { font-size: 0.6rem; font-weight: 600; }
     .share-phone-wrap {
       position: relative;
       flex: 1;
-      height: 100%;
+      min-height: 110px;
       box-sizing: border-box;
       display: flex;
       align-items: flex-end;
-      justify-content: flex-end;
+      justify-content: center;
       overflow: visible;
-      margin: 0 8px 0 0;
-      padding-bottom: 16px;
+      margin: 2px 0 0 0;
+      padding-bottom: 14px;
     }
     .share-phone-img {
-      width: 46%;
-      max-width: none;
+      height: 155px;
+      width: auto;
+      max-width: 100%;
       display: block;
-      filter: drop-shadow(0 16px 22px rgba(0, 0, 0, 0.45));
+      filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.45));
     }
     .share-ready-badge {
       position: absolute;
@@ -566,13 +581,13 @@
       bottom: 10px;
       background: #ffffff;
       color: #0b0b0b;
-      border-radius: 13px;
-      padding: 7px 11px;
+      border-radius: 12px;
+      padding: 6px 9px;
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
       font-weight: 600;
-      font-size: 0.58rem;
+      font-size: 0.52rem;
       line-height: 1.1;
       box-shadow: 0 10px 20px rgba(0,0,0,0.4);
       transform: rotate(-6deg);
@@ -580,8 +595,8 @@
       white-space: nowrap;
     }
     .share-ready-icon {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
       background: #ccff00;
       display: flex;
@@ -589,111 +604,123 @@
       justify-content: center;
       flex-shrink: 0;
     }
-    .share-ready-icon svg { width: 11px; height: 11px; }
+    .share-ready-icon svg { width: 10px; height: 10px; }
     @media (max-width: 900px) {
-      .share-row { flex-direction: column; height: auto; }
-      .share-methods { width: 100%; }
-      .share-phone-wrap { flex: none; height: 190px; margin: 12px 8px 0 0; }
-      .share-phone-img { width: 58%; }
-      .share-ready-badge { right: 10px; bottom: 10px; }
+      .share-row { margin-top: 20px; gap: 8px; }
+      .share-methods { gap: 8px; }
+      .share-method { padding: 6px 12px 6px 6px; gap: 9px; }
+      .share-method-icon { width: 24px; height: 24px; }
+      .share-method-icon svg { width: 14px; height: 14px; }
+      .share-method-icon.icon-link svg, .share-method-icon.icon-qr svg { width: 17px; height: 17px; }
+      .share-method span.label { font-size: 0.68rem; }
+      .share-phone-wrap { min-height: 190px; padding-bottom: 16px; }
+      .share-phone-img { height: 200px; }
+      .share-ready-badge { right: 10px; bottom: 10px; padding: 7px 11px; font-size: 0.58rem; }
+      .share-ready-icon { width: 20px; height: 20px; }
+      .share-ready-icon svg { width: 11px; height: 11px; }
     }
     .loyalty-row {
       display: flex;
-      flex-direction: column;
-      align-items: stretch;
+      flex-direction: row;
+      align-items: center;
       flex: 1;
-      gap: 6px;
-      margin-top: 20px;
+      gap: 12px;
+      margin-top: 4px;
       height: auto;
     }
     .loyalty-methods {
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      flex: none;
-      width: 100%;
-      justify-content: flex-start;
+      gap: 6px;
+      flex: 0 0 auto;
+      width: 148px;
+      justify-content: center;
     }
     .loyalty-method {
       display: flex;
       align-items: center;
-      gap: 11px;
+      gap: 6px;
     }
     .loyalty-method-icon {
-      width: 22px;
-      height: 22px;
+      width: 15px;
+      height: 15px;
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .loyalty-method-icon svg { width: 21px; height: 21px; }
-    .loyalty-method span.label { font-size: 0.82rem; font-weight: 600; }
+    .loyalty-method-icon svg { width: 14px; height: 14px; }
+    .loyalty-method span.label { font-size: 0.6rem; font-weight: 600; line-height: 1.15; }
     .loyalty-phone-wrap {
       position: relative;
       flex: 1;
-      min-height: 220px;
+      min-height: 100px;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       justify-content: center;
       overflow: visible;
-      margin: 4px 0 0 0;
-      padding-bottom: 18px;
+      margin: 0;
+      padding-bottom: 0;
     }
     .loyalty-phone-img {
-      height: 280px;
+      height: 150px;
       width: auto;
       max-width: 100%;
       display: block;
-      filter: drop-shadow(0 16px 22px rgba(0, 0, 0, 0.28));
+      filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.28));
     }
     @media (max-width: 900px) {
-      .loyalty-row { flex: none; }
+      .loyalty-row { flex-direction: column; align-items: stretch; flex: none; margin-top: 20px; gap: 6px; }
+      .loyalty-methods { width: 100%; gap: 12px; }
+      .loyalty-method { gap: 11px; }
+      .loyalty-method-icon { width: 22px; height: 22px; }
+      .loyalty-method-icon svg { width: 21px; height: 21px; }
+      .loyalty-method span.label { font-size: 0.82rem; }
       .loyalty-phone-wrap { flex: none; height: 240px; min-height: 0; padding-bottom: 14px; }
       .loyalty-phone-img { height: 210px; }
     }
     .actualiza-row {
       display: flex;
-      flex-direction: column;
-      align-items: stretch;
+      flex-direction: row;
+      align-items: center;
       flex: 1;
-      gap: 8px;
-      margin-top: 24px;
+      gap: 10px;
+      margin-top: 6px;
       height: auto;
     }
     .actualiza-methods {
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      flex: none;
-      width: 100%;
-      justify-content: flex-start;
+      gap: 5px;
+      flex: 0 0 auto;
+      width: 148px;
+      justify-content: center;
     }
     .actualiza-method {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 6px;
     }
     .actualiza-method-icon {
-      width: 22px;
-      height: 22px;
+      width: 14px;
+      height: 14px;
       flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .actualiza-method-icon svg { width: 21px; height: 21px; }
-    .actualiza-method span.label { font-size: 0.9rem; font-weight: 600; }
+    .actualiza-method-icon svg { width: 13px; height: 13px; }
+    .actualiza-method span.label { font-size: 0.56rem; font-weight: 600; line-height: 1.15; }
     .actualiza-phone-wrap {
       position: relative;
       flex: 1;
-      min-height: 220px;
+      min-height: 100px;
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       justify-content: center;
       overflow: visible;
-      margin: 10px 0 0 0;
-      padding-bottom: 18px;
+      margin: 0;
+      padding-bottom: 0;
     }
     .actualiza-phone-inner {
       position: relative;
@@ -701,52 +728,57 @@
       line-height: 0;
     }
     .actualiza-phone-img {
-      height: 280px;
+      height: 150px;
       width: auto;
       max-width: 100%;
       display: block;
-      filter: drop-shadow(0 20px 28px rgba(0, 0, 0, 0.5));
+      filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.5));
     }
     .actualiza-badge {
       position: absolute;
-      right: -22px;
-      top: 6%;
+      right: -14px;
+      top: 2px;
       background: rgba(140, 255, 60, 0.14);
       border: 1px solid rgba(180, 255, 100, 0.55);
       backdrop-filter: blur(6px);
       color: #ccff00;
-      border-radius: 14px;
-      padding: 9px 14px;
+      border-radius: 10px;
+      padding: 5px 8px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 5px;
       font-weight: 600;
-      font-size: 0.72rem;
+      font-size: 0.5rem;
       line-height: 1.2;
-      box-shadow: 0 0 24px rgba(150, 255, 60, 0.25);
+      box-shadow: 0 0 16px rgba(150, 255, 60, 0.25);
       z-index: 4;
       white-space: nowrap;
     }
     .actualiza-badge-dot {
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: #ccff00;
-      box-shadow: 0 0 8px 2px rgba(204, 255, 0, 0.7);
+      box-shadow: 0 0 6px 1.5px rgba(204, 255, 0, 0.7);
       flex-shrink: 0;
     }
     @media (max-width: 900px) {
-      .actualiza-row { flex: none; }
+      .actualiza-row { flex-direction: column; align-items: stretch; flex: none; margin-top: 20px; gap: 8px; }
+      .actualiza-methods { width: 100%; gap: 14px; }
+      .actualiza-method { gap: 12px; }
+      .actualiza-method-icon { width: 22px; height: 22px; }
+      .actualiza-method-icon svg { width: 21px; height: 21px; }
+      .actualiza-method span.label { font-size: 0.9rem; }
       .actualiza-phone-wrap { flex: none; height: 300px; min-height: 0; padding-bottom: 14px; }
       .actualiza-phone-img { height: 210px; }
-      .actualiza-badge { right: -30px; top: 4%; padding: 7px 11px; font-size: 0.6rem; }
+      .actualiza-badge { right: -30px; top: 4%; padding: 7px 11px; font-size: 0.6rem; border-radius: 14px; }
       .actualiza-badge-dot { width: 7px; height: 7px; }
     }
   </style>
   <section class="features-section" id="funciones">
     <h2 class="features-intro" id="revealText">Negocios de todo tipo usan GoGo para mostrar lo que venden y hacer que sus clientes vuelvan.</h2>
     <div class="bento-grid">
-      <div class="bento-card card-tall bento-green">
+      <div class="bento-card card-square bento-green">
         <div class="card-content">
           <h3 class="card-title">01 | Muestra</h3>
           <p class="card-desc">Todo tu negocio en un solo lugar. Productos, servicios, platos, fotografías, precios, horarios y ubicaciones.</p>
@@ -762,7 +794,7 @@
           <img src="assets/Mockup1-v2.webp" alt="Vista previa de una página GoGo en el celular" class="mockup-phone-img" loading="lazy">
         </div>
       </div>
-      <div class="bento-card card-wide bento-dark">
+      <div class="bento-card card-square bento-dark">
         <div class="card-content">
           <h3 class="card-title"><span class="accent">02</span> | Comparte</h3>
           <p class="card-desc">Un link. Un QR. Listo. Instagram, WhatsApp, Google, mesas, empaques o donde quieras.</p>
@@ -805,7 +837,8 @@
           Listo para<br>compartir
         </span>
       </div>
-      <div class="bento-card bento-dark card-half-left">
+      <div class="bento-col-stack">
+      <div class="bento-card bento-dark card-wideshort">
         <div class="card-content">
           <h3 class="card-title">03 | Actualiza</h3>
           <p class="card-desc">Cambia lo que necesites al instante. Precios, productos, fotografías, promociones o disponibilidad.</p>
@@ -854,7 +887,7 @@
           </div>
         </div>
       </div>
-      <div class="bento-card bento-green card-half-right">
+      <div class="bento-card bento-green card-wideshort">
         <div class="card-content">
           <h3 class="card-title">04 | Fideliza</h3>
           <p class="card-desc">Haz que tus clientes tengan una razón para volver. Puntos, sellos, recompensas e información sobre tus clientes.</p>
@@ -890,6 +923,7 @@
             <img src="assets/Mockup4-v2.webp" alt="Pantalla de puntos y recompensas de tu programa de fidelización GoGo" class="loyalty-phone-img" loading="lazy">
           </div>
         </div>
+      </div>
       </div>
     </div>
   </section>
