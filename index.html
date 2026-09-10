@@ -557,7 +557,6 @@
       display: block;
       filter: drop-shadow(0 16px 22px rgba(0, 0, 0, 0.45));
     }
-    .share-phone-img-mobile { display: none; }
     .share-ready-badge {
       position: absolute;
       right: 10px;
@@ -592,8 +591,7 @@
       .share-row { flex-direction: column; height: auto; }
       .share-methods { width: 100%; }
       .share-phone-wrap { flex: none; height: 190px; margin: 12px 8px 0 0; }
-      .share-phone-img-desktop { display: none; }
-      .share-phone-img-mobile { display: block; width: 62%; }
+      .share-phone-img { width: 58%; }
       .share-ready-badge { right: 10px; bottom: 10px; }
     }
     .loyalty-row {
@@ -631,7 +629,7 @@
     .loyalty-phone-wrap {
       position: relative;
       flex: 1;
-      min-height: 175px;
+      min-height: 220px;
       display: flex;
       align-items: flex-end;
       justify-content: center;
@@ -639,15 +637,16 @@
       margin: 4px 0 -20px 0;
     }
     .loyalty-phone-img {
-      width: 46%;
-      max-width: none;
+      height: 300px;
+      width: auto;
+      max-width: 100%;
       display: block;
       filter: drop-shadow(0 16px 22px rgba(0, 0, 0, 0.28));
     }
     @media (max-width: 900px) {
       .loyalty-row { flex: none; }
-      .loyalty-phone-wrap { flex: none; height: 175px; min-height: 0; }
-      .loyalty-phone-img { width: 54%; }
+      .loyalty-phone-wrap { flex: none; height: 240px; min-height: 0; }
+      .loyalty-phone-img { height: 230px; }
     }
     .actualiza-row {
       display: flex;
@@ -684,23 +683,29 @@
     .actualiza-phone-wrap {
       position: relative;
       flex: 1;
-      min-height: 260px;
+      min-height: 220px;
       display: flex;
       align-items: flex-end;
       justify-content: center;
       overflow: visible;
       margin: 10px 0 -20px 0;
     }
+    .actualiza-phone-inner {
+      position: relative;
+      display: inline-block;
+      line-height: 0;
+    }
     .actualiza-phone-img {
-      width: 44%;
-      max-width: none;
+      height: 300px;
+      width: auto;
+      max-width: 100%;
       display: block;
       filter: drop-shadow(0 20px 28px rgba(0, 0, 0, 0.5));
     }
     .actualiza-badge {
       position: absolute;
-      right: 4%;
-      top: 8%;
+      right: -22px;
+      top: 6%;
       background: rgba(140, 255, 60, 0.14);
       border: 1px solid rgba(180, 255, 100, 0.55);
       backdrop-filter: blur(6px);
@@ -727,9 +732,9 @@
     }
     @media (max-width: 900px) {
       .actualiza-row { flex: none; }
-      .actualiza-phone-wrap { flex: none; height: 320px; min-height: 0; }
-      .actualiza-phone-img { width: 58%; }
-      .actualiza-badge { right: 2%; top: 6%; padding: 7px 11px; font-size: 0.6rem; }
+      .actualiza-phone-wrap { flex: none; height: 300px; min-height: 0; }
+      .actualiza-phone-img { height: 230px; }
+      .actualiza-badge { right: -30px; top: 4%; padding: 7px 11px; font-size: 0.6rem; }
       .actualiza-badge-dot { width: 7px; height: 7px; }
     }
   </style>
@@ -749,7 +754,7 @@
               <path d="M40 58L56 62L52 46" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </span>
-          <img src="assets/Mockup1-card.png" alt="Vista previa de una página GoGo en el celular" class="mockup-phone-img" loading="lazy">
+          <img src="assets/Mockup1-v2.webp" alt="Vista previa de una página GoGo en el celular" class="mockup-phone-img" loading="lazy">
         </div>
       </div>
       <div class="bento-card card-wide bento-dark">
@@ -785,8 +790,7 @@
             </div>
           </div>
           <div class="share-phone-wrap">
-            <img src="assets/Mockup2-card.png" alt="Pantalla para compartir tu GoGo por link, QR o redes" class="share-phone-img share-phone-img-desktop" loading="lazy">
-            <img src="assets/Mockup2-card-mobile.png" alt="Pantalla para compartir tu GoGo por link, QR o redes" class="share-phone-img share-phone-img-mobile" loading="lazy">
+            <img src="assets/Mockup2-v2.webp" alt="Pantalla para compartir tu GoGo por link, QR o redes" class="share-phone-img" loading="lazy">
           </div>
         </div>
         <span class="share-ready-badge">
@@ -835,11 +839,13 @@
             </div>
           </div>
           <div class="actualiza-phone-wrap">
-            <img src="assets/Mockup4-card.png" alt="Panel de productos de GoGo para actualizar precios y disponibilidad" class="actualiza-phone-img" loading="lazy">
-            <span class="actualiza-badge">
-              <span class="actualiza-badge-dot"></span>
-              Cambios<br>en tiempo real
-            </span>
+            <div class="actualiza-phone-inner">
+              <img src="assets/Mockup3-v2.webp" alt="Panel de productos de GoGo para actualizar precios y disponibilidad" class="actualiza-phone-img" loading="lazy">
+              <span class="actualiza-badge">
+                <span class="actualiza-badge-dot"></span>
+                Cambios<br>en tiempo real
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -876,7 +882,7 @@
             </div>
           </div>
           <div class="loyalty-phone-wrap">
-            <img src="assets/Mockup3-card.png" alt="Pantalla de puntos y recompensas de tu programa de fidelización GoGo" class="loyalty-phone-img" loading="lazy">
+            <img src="assets/Mockup4-v2.webp" alt="Pantalla de puntos y recompensas de tu programa de fidelización GoGo" class="loyalty-phone-img" loading="lazy">
           </div>
         </div>
       </div>
