@@ -458,16 +458,16 @@
     }
     .mockup-tall {
       position: relative;
-      margin: 16px -24px 0 -4px;
-      padding-bottom: 12px;
+      margin: 16px -24px -28px -4px;
+      padding-bottom: 0;
       flex: 1;
       min-height: 160px;
       display: flex;
-      align-items: flex-start;
+      align-items: flex-end;
       justify-content: flex-end;
     }
     .mockup-phone-img {
-      height: 235px;
+      height: 258px;
       width: auto;
       max-width: none;
       display: block;
@@ -494,7 +494,7 @@
       transform: rotate(6deg);
     }
     @media (max-width: 900px) {
-      .mockup-tall { margin: 40px -24px 0 -8px; padding-bottom: 20px; min-height: 260px; flex: 1; }
+      .mockup-tall { margin: 40px -24px 0 -8px; padding-bottom: 20px; min-height: 260px; flex: 1; align-items: flex-start; }
       .mockup-phone-img { height: auto; width: 82%; }
       .mockup-annotation { left: 8px; top: -22px; max-width: 170px; font-size: 1.4rem; }
       .mockup-annotation-arrow { width: 42px; margin: 4px 0 0 100px; }
@@ -565,11 +565,11 @@
       align-items: flex-end;
       justify-content: center;
       overflow: visible;
-      margin: 2px 0 0 0;
-      padding-bottom: 14px;
+      margin: 2px 0 -28px 0;
+      padding-bottom: 0;
     }
     .share-phone-img {
-      height: 155px;
+      height: 172px;
       width: auto;
       max-width: 100%;
       display: block;
@@ -613,7 +613,7 @@
       .share-method-icon svg { width: 14px; height: 14px; }
       .share-method-icon.icon-link svg, .share-method-icon.icon-qr svg { width: 17px; height: 17px; }
       .share-method span.label { font-size: 0.68rem; }
-      .share-phone-wrap { min-height: 190px; padding-bottom: 16px; }
+      .share-phone-wrap { min-height: 190px; padding-bottom: 16px; margin: 2px 0 0 0; }
       .share-phone-img { height: 200px; }
       .share-ready-badge { right: 10px; bottom: 10px; padding: 7px 11px; font-size: 0.58rem; }
       .share-ready-icon { width: 20px; height: 20px; }
@@ -658,12 +658,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      align-self: flex-end;
       overflow: visible;
-      margin: 0;
+      margin: 0 0 -22px 0;
       padding-bottom: 0;
     }
     .loyalty-phone-img {
-      height: 150px;
+      height: 166px;
       width: auto;
       max-width: 100%;
       display: block;
@@ -676,7 +677,7 @@
       .loyalty-method-icon { width: 22px; height: 22px; }
       .loyalty-method-icon svg { width: 21px; height: 21px; }
       .loyalty-method span.label { font-size: 0.82rem; }
-      .loyalty-phone-wrap { flex: none; height: 240px; min-height: 0; padding-bottom: 14px; }
+      .loyalty-phone-wrap { flex: none; height: 240px; min-height: 0; padding-bottom: 14px; align-self: stretch; margin: 0; }
       .loyalty-phone-img { height: 210px; }
     }
     .actualiza-row {
