@@ -447,7 +447,8 @@
     .card-desc { font-size: 0.95rem; line-height: 1.5; opacity: 0.8; font-weight: 500; }
     .mockup-tall {
       position: relative;
-      margin: 34px -34px -34px -8px;
+      margin: 34px -34px 0 -8px;
+      padding-bottom: 24px;
       flex: 1;
       min-height: 300px;
       display: flex;
@@ -481,7 +482,7 @@
       transform: rotate(6deg);
     }
     @media (max-width: 900px) {
-      .mockup-tall { margin: 40px -24px -24px -8px; min-height: 260px; }
+      .mockup-tall { margin: 40px -24px 0 -8px; padding-bottom: 20px; min-height: 260px; }
       .mockup-phone-img { width: 82%; }
     }
     .mockup-wide {
@@ -545,11 +546,13 @@
       position: relative;
       flex: 1;
       height: 100%;
+      box-sizing: border-box;
       display: flex;
       align-items: flex-end;
       justify-content: flex-end;
       overflow: visible;
-      margin: 0 8px -20px 0;
+      margin: 0 8px 0 0;
+      padding-bottom: 16px;
     }
     .share-phone-img {
       width: 46%;
@@ -634,10 +637,11 @@
       align-items: flex-end;
       justify-content: center;
       overflow: visible;
-      margin: 4px 0 -20px 0;
+      margin: 4px 0 0 0;
+      padding-bottom: 18px;
     }
     .loyalty-phone-img {
-      height: 300px;
+      height: 280px;
       width: auto;
       max-width: 100%;
       display: block;
@@ -645,8 +649,8 @@
     }
     @media (max-width: 900px) {
       .loyalty-row { flex: none; }
-      .loyalty-phone-wrap { flex: none; height: 240px; min-height: 0; }
-      .loyalty-phone-img { height: 230px; }
+      .loyalty-phone-wrap { flex: none; height: 240px; min-height: 0; padding-bottom: 14px; }
+      .loyalty-phone-img { height: 210px; }
     }
     .actualiza-row {
       display: flex;
@@ -688,7 +692,8 @@
       align-items: flex-end;
       justify-content: center;
       overflow: visible;
-      margin: 10px 0 -20px 0;
+      margin: 10px 0 0 0;
+      padding-bottom: 18px;
     }
     .actualiza-phone-inner {
       position: relative;
@@ -696,7 +701,7 @@
       line-height: 0;
     }
     .actualiza-phone-img {
-      height: 300px;
+      height: 280px;
       width: auto;
       max-width: 100%;
       display: block;
@@ -732,8 +737,8 @@
     }
     @media (max-width: 900px) {
       .actualiza-row { flex: none; }
-      .actualiza-phone-wrap { flex: none; height: 300px; min-height: 0; }
-      .actualiza-phone-img { height: 230px; }
+      .actualiza-phone-wrap { flex: none; height: 300px; min-height: 0; padding-bottom: 14px; }
+      .actualiza-phone-img { height: 210px; }
       .actualiza-badge { right: -30px; top: 4%; padding: 7px 11px; font-size: 0.6rem; }
       .actualiza-badge-dot { width: 7px; height: 7px; }
     }
