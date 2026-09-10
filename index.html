@@ -1338,7 +1338,7 @@
       <!-- Columna 1: Acordeón de Botones Negros con Hover Verde Neón -->
       <div class="dash-list-column">
         
-        <a href="#contacto" class="dash-pill-btn active">
+        <a href="#contacto" class="dash-pill-btn active" data-preview="assets/Imagen.png" onclick="return dashSelectTab(this, event)">
           <div class="pill-left">
             <span class="pill-num">01</span>
             <span>Página Personalizada</span>
@@ -1346,7 +1346,7 @@
           <span class="arrow-icon">➔</span>
         </a>
 
-        <a href="#contacto" class="dash-pill-btn">
+        <a href="#contacto" class="dash-pill-btn" data-preview="assets/imagen%202.png" onclick="return dashSelectTab(this, event)">
           <div class="pill-left">
             <span class="pill-num">02</span>
             <span>Código QR Directo</span>
@@ -1354,7 +1354,7 @@
           <span class="arrow-icon">➔</span>
         </a>
 
-        <a href="#contacto" class="dash-pill-btn">
+        <a href="#contacto" class="dash-pill-btn" onclick="return dashSelectTab(this, event)">
           <div class="pill-left">
             <span class="pill-num">03</span>
             <span>Botón WhatsApp</span>
@@ -1362,7 +1362,7 @@
           <span class="arrow-icon">➔</span>
         </a>
 
-        <a href="#contacto" class="dash-pill-btn">
+        <a href="#contacto" class="dash-pill-btn" onclick="return dashSelectTab(this, event)">
           <div class="pill-left">
             <span class="pill-num">04</span>
             <span>Catálogo y Precios</span>
@@ -1406,6 +1406,22 @@
 
   </div>
 </section>
+
+<script>
+  // Cambia el ítem activo (01/02/03/04) y su imagen de preview en la sección "Todo lo que necesitas".
+  function dashSelectTab(el, event) {
+    if (event) event.preventDefault();
+    var pills = document.querySelectorAll('.dash-pill-btn');
+    pills.forEach(function (btn) { btn.classList.remove('active'); });
+    el.classList.add('active');
+    var src = el.getAttribute('data-preview');
+    if (src) {
+      var img = document.getElementById('dashPreviewImage');
+      if (img) img.src = src;
+    }
+    return false;
+  }
+</script>
 
   <!-- ================= SECCIÓN DE TESTIMONIOS ================= -->
   <style>
